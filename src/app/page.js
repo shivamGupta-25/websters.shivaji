@@ -1,101 +1,132 @@
-import Image from "next/image";
+"use client";
+
+// without loading Screen
+
+import { useCallback, useState, useEffect, memo, useRef } from "react";
+import dynamic from 'next/dynamic';
+import Header from "./_components/Header";
+import Footer from "./_components/Footer";
+
+// Dynamically import components with loading priority
+// Critical components loaded first with higher priority
+const Banner = dynamic(() => import("./_components/Banner"), { 
+  ssr: true,
+  loading: () => <div className="h-[400px] animate-pulse bg-gray-100 rounded-lg" aria-label="Loading banner" />
+});
+
+// Less critical components loaded with lower priority
+const About = dynamic(() => import("./_components/About"), { ssr: true });
+const Workshop = dynamic(() => import("./_components/Workshop"), { ssr: true });
+const PastEvent = dynamic(() => import("./_components/PastEvent"), { ssr: true });
+const Council = dynamic(() => import("./_components/Council"), { ssr: true });
+const ScrollToTopButton = dynamic(() => import("./_components/ScrollToTopButton"), { ssr: false });
+
+// Memoize UI components to prevent unnecessary re-renders
+const ScrollIndicator = memo(({ visible }) => (
+  <div 
+    className={`fixed bottom-8 w-full flex justify-center z-50 transition-opacity duration-500 ${
+      visible ? 'opacity-80 hover:opacity-100' : 'opacity-0 pointer-events-none'
+    }`}
+    aria-hidden={!visible}
+  >
+    <div className="flex flex-col items-center animate-bounce">
+      <span className="text-sm text-gray-600 mb-1 text-center px-4">Scroll to explore</span>
+      <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  </div>
+));
+
+ScrollIndicator.displayName = 'ScrollIndicator';
+
+// Custom hook for scroll state management with optimized performance
+const useScrollState = () => {
+  // Use a single state object to reduce re-renders
+  const [scroll, setScroll] = useState({
+    showIndicator: true,
+    showTopButton: false
+  });
+  
+  // Use refs to avoid dependency issues and prevent unnecessary re-renders
+  const scrollRef = useRef(scroll);
+  scrollRef.current = scroll;
+  
+  // Use ref for tracking animation frame to properly clean up
+  const rafIdRef = useRef(null);
+  const tickingRef = useRef(false);
+
+  useEffect(() => {
+    // Store last scroll position to avoid unnecessary calculations
+    let lastScrollY = window.scrollY;
+    
+    const handleScroll = () => {
+      // Store current scroll position
+      lastScrollY = window.scrollY;
+      
+      if (!tickingRef.current) {
+        rafIdRef.current = window.requestAnimationFrame(() => {
+          // Only update state if values would actually change
+          const shouldShowIndicator = lastScrollY < 100;
+          const shouldShowTopButton = lastScrollY > 300;
+          
+          if (scrollRef.current.showIndicator !== shouldShowIndicator || 
+              scrollRef.current.showTopButton !== shouldShowTopButton) {
+            setScroll({
+              showIndicator: shouldShowIndicator,
+              showTopButton: shouldShowTopButton
+            });
+          }
+          
+          tickingRef.current = false;
+        });
+        tickingRef.current = true;
+      }
+    };
+
+    // Use passive event listener for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafIdRef.current) {
+        window.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, []); // Empty dependency array since we're using refs
+
+  return scroll;
+};
+
+// Memoized main content component to prevent unnecessary re-renders
+const MainContent = memo(({ scroll, scrollToTop }) => (
+  <>
+    <Header />
+    <main>
+      <Banner />
+      <About />
+      <Workshop />
+      <PastEvent />
+      <Council />
+      <ScrollIndicator visible={scroll.showIndicator} />
+      <ScrollToTopButton visible={scroll.showTopButton} onClick={scrollToTop} />
+    </main>
+    <Footer />
+  </>
+));
+
+MainContent.displayName = 'MainContent';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  // Use custom hook for optimized scroll handling
+  const scroll = useScrollState();
+  
+  // Memoize callback functions to prevent unnecessary re-renders
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+  // Use memoized main content to prevent unnecessary re-renders
+  return <MainContent scroll={scroll} scrollToTop={scrollToTop} />;
 }
