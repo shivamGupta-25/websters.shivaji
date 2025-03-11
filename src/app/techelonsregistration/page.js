@@ -263,6 +263,12 @@ function RegistrationPageContent() {
           setInvalidPreselectedEvent(null);
         }
         
+        // Clear team members data when switching to individual event
+        if (event.teamSize.max === 1) {
+          unregister('teamMembers');
+          setTeamSize(0);
+        }
+        
         setSelectedEvent(event);
         setRequiredTeamSize(event.teamSize);
         setTeamSize(Math.max(1, event.teamSize.min - 1));
@@ -280,7 +286,7 @@ function RegistrationPageContent() {
         );
       }
     }
-  }, [watchedEvent, preselectedEventId, setValue, invalidPreselectedEvent]);
+  }, [watchedEvent, preselectedEventId, setValue, invalidPreselectedEvent, unregister]);
 
   const handleRemoveMember = useCallback(() => {
     const newSize = Math.max(requiredTeamSize.min - 1, teamSize - 1);
