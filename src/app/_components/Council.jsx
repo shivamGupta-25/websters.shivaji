@@ -10,6 +10,7 @@ import "swiper/css/effect-coverflow";
 import "swiper/css/autoplay";
 import { memo, useCallback, useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Council members data - kept outside component to prevent re-creation
 const councilMembers = [
@@ -175,13 +176,47 @@ const SWIPER_CONFIG = {
 };
 
 // Skeleton loader component for better UX during loading
-const CouncilSkeleton = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {[...Array(4)].map((_, index) => (
-            <div key={index} className="h-[460px] bg-gray-100 animate-pulse rounded-lg" />
-        ))}
+const CouncilSkeleton = memo(() => (
+    <div className="w-full max-w-7xl mx-auto px-4 py-6">
+        {/* Heading skeleton */}
+        <div className="mb-6 text-center">
+            <Skeleton className="h-10 w-64 mx-auto mb-2" />
+            <Skeleton className="h-4 w-full max-w-md mx-auto" />
+        </div>
+        
+        {/* Council members grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, index) => (
+                <div key={index} className="overflow-hidden bg-white dark:bg-gray-900 shadow-md rounded-xl h-[460px]">
+                    <div className="flex flex-col h-full">
+                        {/* Image skeleton with responsive aspect ratio */}
+                        <div className="w-full relative bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900" style={{ paddingTop: '100%' }}>
+                            <Skeleton className="absolute inset-0 w-full h-full" />
+                        </div>
+                        
+                        {/* Content skeleton */}
+                        <div className="p-4 flex flex-col flex-grow space-y-3">
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                            <Skeleton className="h-4 w-5/6" />
+                            <Skeleton className="h-4 w-full" />
+                            
+                            {/* Social icons skeleton */}
+                            <div className="flex space-x-2 mt-auto pt-2">
+                                <Skeleton className="h-8 w-8 rounded-full" />
+                                <Skeleton className="h-8 w-8 rounded-full" />
+                                <Skeleton className="h-8 w-8 rounded-full" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
     </div>
-);
+));
+
+// Add display name for better debugging
+CouncilSkeleton.displayName = 'CouncilSkeleton';
 
 const Council = () => {
     // Use a ref to track if component is mounted to prevent hydration issues

@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectCards, Autoplay } from "swiper/modules";
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import dynamic from 'next/dynamic';
 import Image from "next/image";
 import { motion } from "framer-motion";
-import "swiper/css";
-import "swiper/css/effect-cards";
-
-// Shadcn UI components
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PastEventSkeleton } from "./Skeletons/PastEvent";
 
 // Custom hook for handling resize with debounce
 const useWindowSize = () => {
@@ -60,6 +56,13 @@ const SLIDES = [
   { title: "Web Hive-23", imageUrl: "/assets/Events/Web_Hive_23.jpg" },
   { title: "Whatzapper-23", imageUrl: "/assets/Events/Whatzapper_23.jpg" }
 ];
+
+// Dynamically import Swiper components with loading skeleton
+const EventSwiper = dynamic(() => 
+  import('./Skeletons/PastEvent/EventSwiper').then(mod => mod.EventSwiper), {
+  loading: () => <PastEventSkeleton />,
+  ssr: false
+});
 
 // Optimized heading component
 const SectionHeading = React.memo(() => (
@@ -120,26 +123,6 @@ const PastEvent = () => {
     setIsMounted(true);
   }, []);
 
-  // Memoize Swiper configuration to prevent recreation on each render
-  const swiperConfig = useMemo(() => ({
-    effect: "cards",
-    grabCursor: true,
-    modules: [EffectCards, Autoplay],
-    className: "aspect-[16/9] rounded-xl",
-    loop: true,
-    autoplay: {
-      delay: isMobile ? 2500 : 3000,
-      disableOnInteraction: false
-    },
-    speed: 800,
-    cardsEffect: {
-      slideShadows: false,
-      perSlideOffset: 8,
-      perSlideRotate: 2,
-      rotate: true,
-    }
-  }), [isMobile]);
-
   // Only render content client-side to prevent hydration issues
   if (!isMounted) return null;
 
@@ -147,33 +130,17 @@ const PastEvent = () => {
     <section
       id="pastevent"
       className="mb-8 sm:py-16 md:py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '0 500px' }}
     >
       <SectionHeading />
 
-      <div className="flex justify-center overflow-hidden">
-        <div className="w-full max-w-[280px] xs:max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-          <Swiper {...swiperConfig}>
-            {SLIDES.map((slide, index) => (
-              <SwiperSlide key={slide.title} className="rounded-xl shadow-lg overflow-hidden bg-gray-800">
-                <EventImage 
-                  src={slide.imageUrl} 
-                  alt={slide.title} 
-                  priority={index < 1}
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      </div>
-
-      <div className="mt-6 sm:mt-8 text-center">
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 hidden sm:block">
-          Swipe to navigate through our past events
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400 sm:hidden">
-          Swipe to view more events
-        </p>
-      </div>
+      <Suspense fallback={<PastEventSkeleton />}>
+        <EventSwiper 
+          slides={SLIDES} 
+          isMobile={isMobile} 
+          EventImage={EventImage} 
+        />
+      </Suspense>
     </section>
   );
 };
