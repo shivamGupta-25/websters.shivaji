@@ -38,7 +38,6 @@ import {
   formatEventDateTime,
   getImagePath,
   getCategoryStyle,
-  EVENT_IMAGES,
   getEffectiveRegistrationStatus,
   FEST_DAYS,
 } from "@/app/_data/techelonsEventsData"
@@ -47,7 +46,7 @@ import {
 const SHARE_SUCCESS_TIMEOUT = 2000;
 const ICON_SIZE = "h-4 w-4";
 
-// Icon map - defined outside component to prevent recreation
+// Icon map
 const ICON_MAP = {
   Code: <Code className="h-3 w-3 mr-1" />,
   Wrench: <Wrench className="h-3 w-3 mr-1" />,
