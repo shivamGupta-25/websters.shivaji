@@ -148,9 +148,8 @@ function RegistrationPageContent() {
   useEffect(() => {
     const preselectedEventId = searchParams.get('preselect');
     
-    // Skip if no preselect parameter or if we already have a selected event
-    // This prevents duplicate processing
-    if (!preselectedEventId || selectedEvent) {
+    // Skip if no preselect parameter
+    if (!preselectedEventId) {
       return;
     }
     
@@ -239,54 +238,56 @@ function RegistrationPageContent() {
         }
       );
     }
-  }, [searchParams, setValue, selectedEvent]);
+  }, [searchParams, setValue]);
 
   // Optimize event selection effect
   useEffect(() => {
-    if (watchedEvent && watchedEvent !== preselectedEventId) {
-      const event = TECHELONS_EVENTS.find(e => e.id === watchedEvent);
-      if (event) {
-        // Check if the selected event's registration is open
-        const effectiveStatus = getEffectiveRegistrationStatus(event);
-        if (effectiveStatus !== REGISTRATION_STATUS.OPEN) {
-          toast.error(`Registration for ${event.name} is ${effectiveStatus}`, { 
-            duration: 3000,
-            icon: '🚫'
-          });
-          setValue("event", "");
-          setSelectedEvent(null);
-          return;
-        }
-        
-        // Clear any invalid preselected event message
-        if (invalidPreselectedEvent) {
-          setInvalidPreselectedEvent(null);
-        }
-        
-        // Clear team members data when switching to individual event
-        if (event.teamSize.max === 1) {
-          unregister('teamMembers');
-          setTeamSize(0);
-        }
-        
-        setSelectedEvent(event);
-        setRequiredTeamSize(event.teamSize);
-        setTeamSize(Math.max(1, event.teamSize.min - 1));
-
-        toast.success(
-          `You've selected: ${event.name}`,
-          { 
-            icon: '🎯',
-            duration: 3000,
-            style: {
-              borderLeft: '4px solid #10B981',
-              padding: '16px'
-            }
-          }
-        );
-      }
+    if (!watchedEvent) {
+      return;
     }
-  }, [watchedEvent, preselectedEventId, setValue, invalidPreselectedEvent, unregister]);
+
+    const event = TECHELONS_EVENTS.find(e => e.id === watchedEvent);
+    if (event) {
+      // Check if the selected event's registration is open
+      const effectiveStatus = getEffectiveRegistrationStatus(event);
+      if (effectiveStatus !== REGISTRATION_STATUS.OPEN) {
+        toast.error(`Registration for ${event.name} is ${effectiveStatus}`, { 
+          duration: 3000,
+          icon: '🚫'
+        });
+        setValue("event", "");
+        setSelectedEvent(null);
+        return;
+      }
+      
+      // Clear any invalid preselected event message
+      if (invalidPreselectedEvent) {
+        setInvalidPreselectedEvent(null);
+      }
+      
+      // Clear team members data when switching to individual event
+      if (event.teamSize.max === 1) {
+        unregister('teamMembers');
+        setTeamSize(0);
+      }
+      
+      setSelectedEvent(event);
+      setRequiredTeamSize(event.teamSize);
+      setTeamSize(Math.max(1, event.teamSize.min - 1));
+
+      toast.success(
+        `You've selected: ${event.name}`,
+        { 
+          icon: '🎯',
+          duration: 3000,
+          style: {
+            borderLeft: '4px solid #10B981',
+            padding: '16px'
+          }
+        }
+      );
+    }
+  }, [watchedEvent, setValue, invalidPreselectedEvent, unregister]);
 
   const handleRemoveMember = useCallback(() => {
     const newSize = Math.max(requiredTeamSize.min - 1, teamSize - 1);
@@ -695,6 +696,17 @@ function RegistrationPageContent() {
                     // Clear the invalid preselected event message when user selects a new event
                     if (invalidPreselectedEvent) {
                       setInvalidPreselectedEvent(null);
+                    }
+                    
+                    // Find and set the selected event
+                    const event = TECHELONS_EVENTS.find(e => e.id === value);
+                    if (event) {
+                      const effectiveStatus = getEffectiveRegistrationStatus(event);
+                      if (effectiveStatus === REGISTRATION_STATUS.OPEN) {
+                        setSelectedEvent(event);
+                        setRequiredTeamSize(event.teamSize);
+                        setTeamSize(Math.max(1, event.teamSize.min - 1));
+                      }
                     }
                   }}
                   value={watchedEvent || ""}
