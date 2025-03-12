@@ -48,17 +48,6 @@ export const validateFile = (file, options = {}) => {
 };
 
 /**
- * Optimizes a file for upload by potentially resizing or compressing it
- * @param {File} file - The file to optimize
- * @returns {Promise<File|Blob>} - The optimized file or blob
- */
-export const optimizeFile = async (file) => {
-    // For now, just return the original file
-    // In the future, this could implement image compression or resizing
-    return file;
-};
-
-/**
  * Converts a file to a buffer
  * @param {File} file - The file to convert
  * @returns {Promise<Buffer>} - The file as a buffer
@@ -83,32 +72,4 @@ export const generateSanitizedFilename = (file, prefix, userData) => {
     const fileExtension = file.name.split('.').pop();
 
     return `${prefix}_${sanitizedName}_${sanitizedCollege}_${eventName}_${timestamp}.${fileExtension}`;
-};
-
-/**
- * Batch validates multiple files
- * @param {Object} files - Object containing files to validate
- * @param {Object} options - Validation options
- * @returns {Object} - Validation results with success flag and errors
- */
-export const batchValidateFiles = (files, options = {}) => {
-    const results = {
-        success: true,
-        errors: []
-    };
-
-    for (const [key, file] of Object.entries(files)) {
-        if (file) {
-            const validation = validateFile(file, options);
-            if (!validation.success) {
-                results.success = false;
-                results.errors.push({
-                    field: key,
-                    error: validation.error
-                });
-            }
-        }
-    }
-
-    return results;
 };

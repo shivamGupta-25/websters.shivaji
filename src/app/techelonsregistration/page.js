@@ -385,6 +385,60 @@ function RegistrationPageContent() {
         return;
       }
       
+      // Check for duplicate emails between main participant and team members
+      if (data.teamMembers?.length > 0) {
+        const mainEmail = data.email.toLowerCase();
+        const duplicateEmail = data.teamMembers.find(
+          member => member.email.toLowerCase() === mainEmail
+        );
+        
+        if (duplicateEmail) {
+          toast.error('Main participant email cannot be the same as any team member email', {
+            duration: 4000,
+            icon: '✉️'
+          });
+          return;
+        }
+        
+        // Check for duplicate emails between team members
+        const teamEmails = data.teamMembers.map(member => member.email.toLowerCase());
+        const hasDuplicateTeamEmails = teamEmails.length !== new Set(teamEmails).size;
+        
+        if (hasDuplicateTeamEmails) {
+          toast.error('Team members cannot have the same email addresses', {
+            duration: 4000,
+            icon: '✉️'
+          });
+          return;
+        }
+
+        // Check for duplicate phone numbers between main participant and team members
+        const mainPhone = data.phone.trim();
+        const duplicatePhone = data.teamMembers.find(
+          member => member.phone.trim() === mainPhone
+        );
+        
+        if (duplicatePhone) {
+          toast.error('Main participant phone number cannot be the same as any team member phone number', {
+            duration: 4000,
+            icon: '📱'
+          });
+          return;
+        }
+        
+        // Check for duplicate phone numbers between team members
+        const teamPhones = data.teamMembers.map(member => member.phone.trim());
+        const hasDuplicateTeamPhones = teamPhones.length !== new Set(teamPhones).size;
+        
+        if (hasDuplicateTeamPhones) {
+          toast.error('Team members cannot have the same phone numbers', {
+            duration: 4000,
+            icon: '📱'
+          });
+          return;
+        }
+      }
+      
       // Check if global registration is still enabled
       if (!REGISTRATION_ENABLED) {
         toast.error('Registration is currently closed', { 
@@ -944,7 +998,20 @@ function RegistrationPageContent() {
 
                           <div className="space-y-1 sm:space-y-2">
                             <Label className="text-sm sm:text-base">College</Label>
-                            <Select onValueChange={(value) => setValue(`teamMembers.${index}.college`, value)}>
+                            <Select onValueChange={(value) => {
+                              setValue(`teamMembers.${index}.college`, value);
+                              if (value === "Shivaji College") {
+                                // Clear the otherCollege field when Shivaji College is selected
+                                setValue(`teamMembers.${index}.otherCollege`, "");
+                                // Unregister the otherCollege field to remove any validation errors
+                                unregister(`teamMembers.${index}.otherCollege`);
+                                
+                                toast(`Team member ${index + 1}: Shivaji College student!`, {
+                                  icon: '🏫',
+                                  duration: 2000
+                                });
+                              }
+                            }}>
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select College" />
                               </SelectTrigger>
