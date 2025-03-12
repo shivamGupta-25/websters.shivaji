@@ -204,11 +204,12 @@ function RegistrationPageContent() {
         `Event preselected: ${event.name}`,
         { 
           icon: '🎯',
-          duration: 4000,
+          duration: 1000,
           style: {
             borderLeft: '4px solid #3B82F6',
             padding: '16px',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            transition: 'all 0.5s ease-out'
           }
         }
       );
