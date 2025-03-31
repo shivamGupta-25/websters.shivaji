@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { fetchTechelonsData } from "@/lib/utils"
 import EventModal from "./TechelonsEventDialog"
@@ -54,6 +55,7 @@ const useEventFiltering = (scheduleData) => {
     const [activeDay, setActiveDay] = useState(null)
     const [activeFilter, setActiveFilter] = useState("all")
     const [searchTerm, setSearchTerm] = useState("")
+    const [featuredOnly, setFeaturedOnly] = useState(false)
 
     // Initialize activeDay once data is loaded
     useEffect(() => {
@@ -81,6 +83,9 @@ const useEventFiltering = (scheduleData) => {
 
         return currentDayEvents
             .filter((event) => {
+                // Filter featured events
+                if (featuredOnly && !event.featured) return false
+                
                 // Filter by category
                 if (activeFilter !== "all" && event.category !== activeFilter) return false
 
@@ -98,11 +103,12 @@ const useEventFiltering = (scheduleData) => {
                 return true
             })
             .sort((a, b) => new Date(`2023-10-27T${a.startTime}`) - new Date(`2023-10-27T${b.startTime}`))
-    }, [activeDay, activeFilter, searchTerm, scheduleData])
+    }, [activeDay, activeFilter, searchTerm, featuredOnly, scheduleData])
 
     const resetFilters = useCallback(() => {
         setActiveFilter("all")
         setSearchTerm("")
+        setFeaturedOnly(false)
     }, [])
 
     return {
@@ -112,6 +118,8 @@ const useEventFiltering = (scheduleData) => {
         setActiveFilter,
         searchTerm,
         setSearchTerm,
+        featuredOnly,
+        setFeaturedOnly,
         allCategories,
         filteredEvents,
         resetFilters
@@ -343,7 +351,7 @@ EventCard.displayName = 'EventCard';
  * Filter component for filtering events
  */
 const EventFilter = memo(
-    ({ categories, activeFilter, setActiveFilter, searchTerm, setSearchTerm }) => (
+    ({ categories, activeFilter, setActiveFilter, searchTerm, setSearchTerm, featuredOnly, setFeaturedOnly }) => (
         <div className="bg-white dark:bg-gray-900 rounded-xl border p-3 mb-4 shadow-sm">
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -366,10 +374,25 @@ const EventFilter = memo(
             </div>
 
             <div className="mt-3">
-                <h3 className="text-sm font-medium mb-2 flex items-center">
-                    <Filter className="h-4 w-4 mr-2 text-primary" />
-                    Filter by Category:
-                </h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium mb-2 flex items-center">
+                        <Filter className="h-4 w-4 mr-2 text-primary" />
+                        Filter by Category:
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                        <Switch 
+                            id="featured-filter"
+                            checked={featuredOnly} 
+                            onCheckedChange={setFeaturedOnly}
+                        />
+                        <label 
+                            htmlFor="featured-filter" 
+                            className="text-xs font-medium text-muted-foreground cursor-pointer whitespace-nowrap"
+                        >
+                            ⭐ Featured Only
+                        </label>
+                    </div>
+                </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                     <Badge
                         onClick={() => setActiveFilter("all")}
@@ -511,6 +534,8 @@ const EventSchedule = () => {
         setActiveFilter,
         searchTerm,
         setSearchTerm,
+        featuredOnly,
+        setFeaturedOnly,
         allCategories,
         filteredEvents,
         resetFilters
@@ -579,6 +604,8 @@ const EventSchedule = () => {
                             setActiveFilter={setActiveFilter}
                             searchTerm={searchTerm}
                             setSearchTerm={setSearchTerm}
+                            featuredOnly={featuredOnly}
+                            setFeaturedOnly={setFeaturedOnly}
                         />
                     </div>
 

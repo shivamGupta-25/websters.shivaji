@@ -32,6 +32,7 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
   const [error, setError] = useState(null);
   const [registrationData, setRegistrationData] = useState(null);
   const [eventData, setEventData] = useState(null);
+  const [defaultWhatsappGroup, setDefaultWhatsappGroup] = useState(null);
 
   useEffect(() => {
     const fetchRegistrationData = async () => {
@@ -78,6 +79,19 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
         
         setRegistrationData(data.registration);
         setEventData(data.event);
+        
+        // Fetch default WhatsApp group if event doesn't have one
+        if (!data.event?.whatsappGroup) {
+          try {
+            const defaultResponse = await fetch('/api/techelons/default-whatsapp');
+            if (defaultResponse.ok) {
+              const defaultData = await defaultResponse.json();
+              setDefaultWhatsappGroup(defaultData.defaultWhatsappGroup);
+            }
+          } catch (defaultError) {
+            console.error("Error fetching default WhatsApp group:", defaultError);
+          }
+        }
       } catch (error) {
         console.error("Error fetching registration data:", error);
         setError(error.message || "Failed to fetch registration data");
@@ -139,11 +153,11 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
               {eventData?.venue && (
                 <p><strong>Venue:</strong> {eventData.venue}</p>
               )}
-              {eventData?.whatsappGroup && (
+              {(eventData?.whatsappGroup || defaultWhatsappGroup) && (
                 <div className="mt-4">
                   <p className="font-medium mb-2">Join WhatsApp Group for Updates:</p>
                   <a 
-                    href={eventData.whatsappGroup} 
+                    href={eventData?.whatsappGroup || defaultWhatsappGroup} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors"

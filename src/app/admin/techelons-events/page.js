@@ -17,6 +17,11 @@ if (techelonsDataFallback && techelonsDataFallback.festInfo) {
   }
 }
 
+// Ensure fallback includes whatsappGroups property
+if (techelonsDataFallback && !techelonsDataFallback.whatsappGroups) {
+  techelonsDataFallback.whatsappGroups = { default: '' };
+}
+
 // Import Alert Dialog components
 import {
   AlertDialog,
@@ -83,6 +88,11 @@ export default function TechelonsManagement() {
             data.festInfo.comingSoonEnabled = false;
           }
           
+          // Initialize whatsappGroups if it doesn't exist
+          if (!data.whatsappGroups) {
+            data.whatsappGroups = { default: '' };
+          }
+          
           setTechelonsData(data);
           setIsUsingFallbackData(false);
         } else {
@@ -120,6 +130,14 @@ export default function TechelonsManagement() {
         ...prev.festInfo,
         [field]: value
       }
+    }));
+  };
+
+  // Handle top-level field changes
+  const handleTopLevelFieldChange = (field, value) => {
+    setTechelonsData(prev => ({
+      ...prev,
+      [field]: value
     }));
   };
 
@@ -369,6 +387,7 @@ export default function TechelonsManagement() {
           <GeneralSettings
             techelonsData={techelonsData}
             handleFestInfoChange={handleFestInfoChange}
+            handleTopLevelFieldChange={handleTopLevelFieldChange}
             handleDateChange={handleDateChange}
           />
         </TabsContent>

@@ -3,7 +3,37 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 
-export default function GeneralSettings({ techelonsData, handleFestInfoChange, handleDateChange }) {
+export default function GeneralSettings({ techelonsData, handleFestInfoChange, handleTopLevelFieldChange, handleDateChange }) {
+  // Helper function to get value from whatsappGroups which could be a Map or a plain object
+  const getWhatsAppGroupValue = (groupKey) => {
+    if (!techelonsData.whatsappGroups) return '';
+    
+    // If it's a Map
+    if (techelonsData.whatsappGroups instanceof Map) {
+      return techelonsData.whatsappGroups.get(groupKey) || '';
+    }
+    
+    // If it's a plain object
+    return techelonsData.whatsappGroups[groupKey] || '';
+  };
+  
+  // Helper function to update whatsappGroups
+  const updateWhatsAppGroups = (key, value) => {
+    let updatedGroups;
+    
+    // If it's a Map
+    if (techelonsData.whatsappGroups instanceof Map) {
+      updatedGroups = new Map(techelonsData.whatsappGroups);
+      updatedGroups.set(key, value);
+    } else {
+      // If it's a plain object
+      updatedGroups = { ...techelonsData.whatsappGroups };
+      updatedGroups[key] = value;
+    }
+    
+    handleTopLevelFieldChange('whatsappGroups', updatedGroups);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="px-4 sm:px-6">
@@ -69,6 +99,18 @@ export default function GeneralSettings({ techelonsData, handleFestInfoChange, h
               className="w-full"
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="default-whatsapp-group" className="text-sm sm:text-base">Default WhatsApp Group Link</Label>
+          <Input
+            id="default-whatsapp-group"
+            value={getWhatsAppGroupValue('default')}
+            onChange={(e) => updateWhatsAppGroups('default', e.target.value)}
+            placeholder="https://chat.whatsapp.com/default-group-link"
+            className="w-full"
+          />
+          <span className="text-xs text-muted-foreground">This link will be used as a fallback if an event doesn't have a specific WhatsApp group.</span>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import TechelonsData from '@/models/TechelonsData';
 
 /**
  * Create a reusable nodemailer transporter using Gmail
@@ -13,6 +14,28 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD,
   },
 });
+
+/**
+ * Get default WhatsApp group link from TechelonsData
+ * @returns {Promise<string>} - Default WhatsApp group link or empty string
+ */
+async function getDefaultWhatsAppGroup() {
+  try {
+    const techelonsData = await TechelonsData.findOne({});
+    if (techelonsData && techelonsData.whatsappGroups) {
+      // Check if it's a Map object
+      if (techelonsData.whatsappGroups instanceof Map) {
+        return techelonsData.whatsappGroups.get('default') || '';
+      } 
+      // Treat as a plain object
+      return techelonsData.whatsappGroups.default || '';
+    }
+    return '';
+  } catch (error) {
+    console.error('Error fetching default WhatsApp group:', error);
+    return '';
+  }
+}
 
 /**
  * Send a confirmation email for Techelons registration
@@ -32,6 +55,12 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
     throw new Error('Recipient email is required');
   }
 
+  // Get default WhatsApp group link if event doesn't have one
+  let whatsappGroupLink = event.whatsappGroup || '';
+  if (!whatsappGroupLink) {
+    whatsappGroupLink = await getDefaultWhatsAppGroup();
+  }
+
   // Format event details with fallbacks
   const eventDetails = {
     name: event.name || 'Event',
@@ -44,7 +73,7 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
     rules: Array.isArray(event.rules) ? event.rules : [],
     competitionStructure: Array.isArray(event.competitionStructure) ? event.competitionStructure : [],
     evaluationCriteria: Array.isArray(event.evaluationCriteria) ? event.evaluationCriteria : [],
-    whatsappGroup: event.whatsappGroup || '',
+    whatsappGroup: whatsappGroupLink,
     coordinators: Array.isArray(event.coordinators) ? event.coordinators : []
   };
 
