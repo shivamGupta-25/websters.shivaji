@@ -1,79 +1,173 @@
 "use client";
-import React, { memo, useMemo } from "react";
+import React, { memo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { fetchSiteContent } from '@/lib/utils';
+import { Skeleton } from "@/components/ui/skeleton";
+import siteContent from '../data/siteContent';
 
-// Memoize animation configurations
+// Animation configurations - simplified and optimized
 const animations = {
     container: {
-        hidden: { opacity: 0, y: 50 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] } }
-    },
-    title: {
-        hidden: { opacity: 0, y: 50 },
+        hidden: { opacity: 0, y: 30 },
         visible: {
             opacity: 1,
             y: 0,
-            transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }
+            transition: { duration: 0.6, ease: "easeOut" }
+        }
+    },
+    title: {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
         }
     },
     content: {
         hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.9, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] } }
+        visible: {
+            opacity: 1,
+            transition: { duration: 0.7, delay: 0.3, ease: "easeOut" }
+        }
     }
 };
 
-// Memoized content paragraphs to prevent re-creation on each render
-const contentParagraphs = [
-    { id: 1, content: "<strong>Websters: The Computer Science Society of Shivaji College</strong>" },
-    { id: 2, content: "At Websters, we believe in the power of technology to shape the future, and our mission is to equip students with the knowledge, skills, and opportunities to thrive in this dynamic field. We serve as a vibrant community where students can not only deepen their understanding of computer science but also engage with cutting-edge developments in the tech world. Through a blend of academic events and hands-on activities, we aim to create an environment that sparks curiosity and encourages innovation." },
-    { id: 3, content: "Our society is led by a passionate and dedicated student council, which plays a pivotal role in curating and executing a range of events, from expert talks and coding competitions to hackathons and project showcases. These events provide students with the chance to network with industry professionals, gain insights into emerging technologies, and develop practical skills that are essential in today's competitive tech landscape." },
-    { id: 4, content: "In addition to skill-building workshops, Websters is also home to a number of collaborative projects that enable students to work together on real-world applications and tech solutions. Whether you're a budding programmer, an aspiring data scientist, or simply someone with an interest in technology, Websters offers a supportive and inspiring space for growth." },
-    { id: 5, content: "Join us as we embark on a journey of learning, collaboration, and innovation—together, we can push the boundaries of what's possible and make a lasting impact in the world of technology." }
-];
+// Simplified content normalization
+const normalizeContent = (content) => {
+    if (!content) return siteContent.about;
 
-// Memoized paragraph component for better performance
-const Paragraph = memo(({ html, className }) => (
-    <p className={className} dangerouslySetInnerHTML={{ __html: html }} />
-));
+    return {
+        title: content.title || siteContent.about.title,
+        paragraphs: Array.isArray(content.paragraphs) && content.paragraphs.length > 0
+            ? content.paragraphs.map((p, index) => ({
+                id: p.id || `p${index + 1}`,
+                content: p.content || `Paragraph ${index + 1}`,
+            }))
+            : siteContent.about.paragraphs
+    };
+};
+
+// Optimized paragraph component with better sanitization
+const Paragraph = memo(({ html, className = "" }) => {
+    // More thorough HTML sanitization
+    const sanitizeHtml = (html) => {
+        if (!html) return '';
+        return html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/on\w+="[^"]*"/gi, '') // Remove event handlers
+            .replace(/javascript:/gi, ''); // Remove javascript: URIs
+    };
+
+    return (
+        <p
+            className={`${className} max-w-full break-words`}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
+        />
+    );
+});
 
 Paragraph.displayName = 'Paragraph';
 
+// Responsive loading skeleton
+const LoadingSkeleton = () => (
+    <section className="w-full px-4 py-8 sm:px-6 sm:py-8 md:px-8 md:py-8 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-screen-lg text-center">
+            <Skeleton className="mx-auto h-12 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl sm:h-16 md:h-20 lg:h-24 mb-4 sm:mb-6 max-w-xs md:max-w-md lg:max-w-lg" />
+            <div className="mx-auto mt-4 text-base sm:mt-6 sm:max-w-lg md:max-w-2xl lg:max-w-4xl md:text-lg space-y-3 sm:space-y-4">
+                {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-4 w-full md:h-5" />
+                ))}
+                <Skeleton className="h-4 w-3/4 md:h-5" />
+                <Skeleton className="mt-4 h-3 w-full sm:mt-6 sm:h-4 sm:w-3/4 mx-auto opacity-60" />
+            </div>
+        </div>
+    </section>
+);
+
 const About = () => {
+    const [aboutContent, setAboutContent] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(false);
+
     const { ref, inView } = useInView({
-        threshold: 0.2,
+        threshold: 0.1,
         triggerOnce: true
     });
+
+    useEffect(() => {
+        const loadContent = async () => {
+            try {
+                // Implement request timeout with AbortController for cleaner cancellation
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const content = await fetchSiteContent({ signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                const normalizedContent = normalizeContent(content?.about);
+                setAboutContent(normalizedContent);
+            } catch (error) {
+                console.error('Error loading about content:', error);
+                setError(true);
+                setAboutContent(normalizeContent(siteContent.about));
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadContent();
+    }, []);
+
+    if (isLoading) {
+        return <LoadingSkeleton />;
+    }
+
+    const { title = "", paragraphs = [] } = aboutContent || {};
 
     return (
         <section
             id="about"
-            className="flex items-center justify-center px-6 mb-12 md:px-12 lg:px-20 xl:px-32"
             ref={ref}
+            className="w-full px-4 py-8 sm:px-6 sm:py-8 md:px-8 md:py-8 lg:px-8 lg:py-8"
         >
             <motion.div
-                className="text-center mt-10 md:mt-16"
+                className="mx-auto max-w-screen-lg text-center"
                 initial="hidden"
                 animate={inView ? "visible" : "hidden"}
                 variants={animations.container}
             >
                 <motion.h1
-                    className="text-6xl sm:text-8xl lg:text-9xl font-extrabold text-gray-900 dark:text-white mb-8"
+                    className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white sm:mb-6"
                     variants={animations.title}
                 >
-                    About Websters
+                    {title && title.length > 50 ? `${title.substring(0, 50)}...` : title}
                 </motion.h1>
+
                 <motion.div
-                    className="mt-6 md:mt-8 text-gray-600 text-base md:text-lg lg:text-xl max-w-4xl mx-auto"
+                    className="mx-auto mt-4 text-base text-gray-600 sm:mt-6 sm:max-w-lg md:max-w-2xl lg:max-w-4xl dark:text-gray-300 md:text-lg"
                     variants={animations.content}
                 >
-                    {contentParagraphs.map((paragraph) => (
+                    {paragraphs.length > 0 ? (
+                        paragraphs.map((paragraph, index) => (
+                            <Paragraph
+                                key={paragraph.id}
+                                html={paragraph.content}
+                                className={index > 0 ? "mt-3 sm:mt-4" : ""}
+                            />
+                        ))
+                    ) : (
                         <Paragraph
-                            key={paragraph.id}
-                            html={paragraph.content}
-                            className={paragraph.id === 1 ? "" : "mt-4"}
+                            html="Information about our company will be available soon."
+                            className="mt-3 italic"
                         />
-                    ))}
+                    )}
+
+                    {error && (
+                        <p className="mt-4 text-xs italic text-gray-500 sm:mt-6 sm:text-sm">
+                            Note: Using local site content. Please check your network connection and refresh the page.
+                        </p>
+                    )}
                 </motion.div>
             </motion.div>
         </section>

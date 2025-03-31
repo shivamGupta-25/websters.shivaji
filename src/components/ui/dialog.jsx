@@ -38,7 +38,7 @@ function DialogOverlay({
     (<DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
         className
       )}
       {...props} />)
@@ -62,7 +62,7 @@ function DialogContent({
         {...props}>
         {children}
         <DialogPrimitive.Close
-          className="border-white absolute top-4 right-6 z-50 rounded-full bg-gray-900/90 p-2.5 backdrop-blur-lg text-white hover:text-white hover:bg-gray-800 hover:scale-105 focus:ring-2 focus:ring-white/30 focus:outline-none transition-all duration-200 shadow-md disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5">
+          className="border-2 border-white absolute top-4 right-6 z-50 rounded-full bg-gray-900/90 p-1.5 backdrop-blur-lg text-white hover:text-white hover:bg-gray-800 hover:scale-105 focus:ring-2 focus:ring-white/30 focus:outline-none transition-all duration-200 shadow-md shadow-black/20 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5">
           <XIcon />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

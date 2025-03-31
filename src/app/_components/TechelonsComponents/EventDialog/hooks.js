@@ -8,7 +8,7 @@ export const useShareEvent = (event) => {
   // Improved clipboard handling with error feedback
   const copyToClipboard = useCallback((title, url) => {
     const shareText = `${title} - ${url}`;
-    
+
     if (navigator.clipboard) {
       navigator.clipboard
         .writeText(shareText)
@@ -38,10 +38,10 @@ export const useShareEvent = (event) => {
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
+
       const successful = document.execCommand("copy");
       document.body.removeChild(textArea);
-      
+
       if (successful) {
         setShareSuccess(true);
         setTimeout(() => setShareSuccess(false), SHARE_SUCCESS_TIMEOUT);
@@ -55,7 +55,7 @@ export const useShareEvent = (event) => {
   const handleShare = useCallback(() => {
     if (!event) return;
 
-    const shareUrl = `${window.location.origin}/techelonsregistration?preselect=${event.id || event.category || "event"}`;
+    const shareUrl = `${window.location.origin}/techelonsregistration?eventId=${event.id}`;
     const shareTitle = `Check out this event: ${event.name} at Techelons 2025`;
 
     if (navigator.share) {
@@ -84,7 +84,10 @@ export const useShareEvent = (event) => {
   return { handleShare, shareSuccess };
 };
 
-// Custom hook for responsive image handling
+/**
+ * Custom hook for responsive image handling
+ * Simplified to focus only on needed functionality
+ */
 export const useImageHandling = () => {
   const [imageState, setImageState] = useState({
     error: false,
@@ -92,79 +95,47 @@ export const useImageHandling = () => {
     height: "auto",
   });
 
-  // Use ResizeObserver for more efficient resize handling
-  const resizeObserverRef = useRef(null);
+  // Simpler width detection with fewer moving parts
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
 
   useEffect(() => {
-    // Use ResizeObserver for better performance
-    if (typeof window !== "undefined" && typeof ResizeObserver !== "undefined") {
-      const resizeObserver = new ResizeObserver(
-        // Use debounce to limit updates
-        debounce((entries) => {
-          const width = entries[0]?.contentRect.width || window.innerWidth;
-          setWindowWidth(width);
-        }, 100)
-      );
-      
-      resizeObserver.observe(document.body);
-      resizeObserverRef.current = resizeObserver;
-      
-      return () => {
-        if (resizeObserverRef.current) {
-          resizeObserverRef.current.disconnect();
-        }
-      };
-    } else {
-      // Fallback to window resize event
-      const handleResize = debounce(() => {
-        setWindowWidth(window.innerWidth);
-      }, 100);
-      
-      window.addEventListener("resize", handleResize, { passive: true });
-      return () => {
-        window.removeEventListener("resize", handleResize);
-      };
-    }
+    if (typeof window === "undefined") return;
+
+    // Simple resize handler with debounce
+    const handleResize = debounce(() => {
+      setWindowWidth(window.innerWidth);
+    }, 100);
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Debounce function to limit execution frequency
+  // Simple debounce implementation
   function debounce(fn, delay) {
     let timer = null;
-    return function(...args) {
+    return function (...args) {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {
-        fn.apply(this, args);
-      }, delay);
+      timer = setTimeout(() => fn(...args), delay);
     };
   }
 
-  // Improved image load handler with better responsive sizing
+  // Optimized image load handler
   const handleImageLoad = useCallback((e) => {
     const img = e.target;
     const { naturalWidth, naturalHeight } = img;
     const aspectRatio = naturalWidth / naturalHeight;
-    
-    // Responsive height calculation based on screen size and aspect ratio
-    let maxHeight;
-    
+
+    // Simple responsive height calculation
+    let maxHeight = "16rem";
+
     if (windowWidth < 640) {
-      // Mobile
-      maxHeight = aspectRatio > 1.5 ? "12rem" : "14rem";
-    } else if (windowWidth < 768) {
-      // Small tablets
-      maxHeight = aspectRatio > 1.5 ? "14rem" : "16rem";
+      maxHeight = "12rem";
     } else if (windowWidth < 1024) {
-      // Tablets
-      maxHeight = aspectRatio > 1.5 ? "16rem" : "18rem";
-    } else if (windowWidth < 1280) {
-      // Small desktops
-      maxHeight = aspectRatio > 1.5 ? "18rem" : "20rem";
+      maxHeight = "16rem";
     } else {
-      // Large desktops
-      maxHeight = aspectRatio > 1.5 ? "20rem" : "24rem";
+      maxHeight = "20rem";
     }
 
     setImageState({
@@ -175,12 +146,11 @@ export const useImageHandling = () => {
   }, [windowWidth]);
 
   const handleImageError = useCallback(() => {
-    setImageState((prev) => ({
-      ...prev,
+    setImageState({
       error: true,
       loading: false,
-      height: windowWidth < 640 ? "12rem" : windowWidth < 1024 ? "16rem" : "20rem",
-    }));
+      height: windowWidth < 640 ? "12rem" : "16rem",
+    });
   }, [windowWidth]);
 
   const resetImage = useCallback(() => {

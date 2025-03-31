@@ -1,81 +1,48 @@
 import { useState, useEffect, lazy, Suspense, useCallback, useMemo, memo } from "react";
 import { useRouter } from "next/navigation";
-import PropTypes from 'prop-types';
-import { isRegistrationOpen, getRegistrationStatusMessage } from "@/app/_data/techelonsEventsData";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-    FeatureCardSkeleton,
-    Scene3DSkeleton,
-    Scene3DFallback,
-    AboutSectionSkeleton,
-    ExploreSectionSkeleton,
-    LOADING_TIMEOUT,
-    CONTENT_LOADING_TIMEOUT
-} from "@/app/_components/Skeletons/Techelons";
+import { fetchTechelonsData } from '@/lib/utils';
+import TechelonsSkeleton from "@/app/_components/Skeletons/TechelonsMainSkeleton";
+import { DEFAULT_CONTENT } from '@/app/data/techelonsData';
 
 // Constants
 const MOBILE_BREAKPOINT = 768;
-const TABLET_BREAKPOINT = 1024;
+const CONTENT_LOADING_TIMEOUT = 1000;
 
-// Lazy load the SplineScene component with dynamic import
-const SplineScene = lazy(() => 
+// Lazy load the SplineScene component
+const SplineScene = lazy(() =>
     import("@/components/ui/splite").then(mod => ({ default: mod.SplineScene }))
 );
 
-// Custom hook for responsive design
-const useResponsive = () => {
-    const [isMobile, setIsMobile] = useState(false);
-    const [isTablet, setIsTablet] = useState(false);
+// Spotlight Effects Component
+const SpotlightEffects = memo(() => (
+    <>
+        <div className="absolute top-1/4 left-1/4 w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 lg:w-96 lg:h-96 bg-blue-500 rounded-full opacity-20 blur-3xl" aria-hidden="true"></div>
+        <div className="absolute top-1/2 right-1/4 w-32 h-32 sm:w-40 sm:h-40 md:w-56 md:h-56 lg:w-64 lg:h-64 bg-purple-500 rounded-full opacity-20 blur-3xl" aria-hidden="true"></div>
+    </>
+));
 
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        
-        const updateDimensions = () => {
-            const width = window.innerWidth;
-            setIsMobile(width <= MOBILE_BREAKPOINT);
-            setIsTablet(width > MOBILE_BREAKPOINT && width <= TABLET_BREAKPOINT);
-        };
-        
-        updateDimensions();
-        
-        if (typeof ResizeObserver !== 'undefined') {
-            const resizeObserver = new ResizeObserver(throttle(updateDimensions, 200));
-            resizeObserver.observe(document.documentElement);
-            return () => resizeObserver.disconnect();
-        } else {
-            const throttledUpdate = throttle(updateDimensions, 200);
-            window.addEventListener('resize', throttledUpdate, { passive: true });
-            return () => window.removeEventListener('resize', throttledUpdate);
-        }
-    }, []);
+SpotlightEffects.displayName = 'SpotlightEffects';
 
-    return { isMobile, isTablet };
-};
+// Scene3D Fallback Content
+const Scene3DFallback = memo(() => (
+    <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-white text-center">
+            <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2">
+                Tech<span className="text-blue-400">elons</span>
+            </div>
+            <div className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-200 mb-2 sm:mb-3 md:mb-4 lg:mb-6">
+                April 2025
+            </div>
+            <div className="flex justify-center space-x-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+            </div>
+        </div>
+    </div>
+));
 
-// Throttle function to limit execution frequency
-function throttle(func, delay) {
-    let lastCall = 0;
-    return function(...args) {
-        const now = Date.now();
-        if (now - lastCall >= delay) {
-            lastCall = now;
-            func.apply(this, args);
-        }
-    };
-}
-
-// Custom hook for registration status
-const useRegistrationStatus = () => {
-    return useMemo(() => {
-        const regStatus = isRegistrationOpen();
-        const statusObj = getRegistrationStatusMessage();
-        
-        return {
-            registrationOpen: regStatus,
-            statusMessage: statusObj.message
-        };
-    }, []);
-};
+Scene3DFallback.displayName = 'Scene3DFallback';
 
 // Feature Card component
 const FeatureCard = memo(({ icon, title, description }) => (
@@ -86,68 +53,126 @@ const FeatureCard = memo(({ icon, title, description }) => (
     </div>
 ));
 
-FeatureCard.propTypes = {
-    icon: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired
-};
-
 FeatureCard.displayName = 'FeatureCard';
 
-// Features data
-const FEATURES = [
-    {
-        title: "Competitions",
-        icon: "🏆",
-        description: "Participate in coding, analysis, and gaming competitions with exciting prizes."
-    },
-    {
-        title: "Seminar",
-        icon: "🎤",
-        description: "Gain insights from industry leaders through engaging and informative seminars."
-    },
-    {
-        title: "Networking",
-        icon: "🌐",
-        description: "Connect with tech enthusiasts and industry professionals."
-    }
-];
+// Message component for notifications
+const StatusMessage = memo(({ message, type = "info" }) => {
+    const typeStyles = {
+        info: "bg-blue-50 border-blue-200 text-blue-600",
+        warning: "bg-amber-50 border-amber-200 text-amber-600",
+        error: "bg-red-50 border-red-200 text-red-600",
+        success: "bg-green-50 border-green-200 text-green-600"
+    };
 
-// Main component
+    return message ? (
+        <div className={`text-sm mb-2 text-center px-4 py-2 rounded-lg border ${typeStyles[type]}`}>
+            {message}
+        </div>
+    ) : null;
+});
+
+StatusMessage.displayName = 'StatusMessage';
+
 const TechelonsMain = () => {
     const router = useRouter();
-    const { isMobile, isTablet } = useResponsive();
-    const { registrationOpen, statusMessage } = useRegistrationStatus();
+    const [isMobile, setIsMobile] = useState(false);
+    const [registrationStatus, setRegistrationStatus] = useState({
+        registrationOpen: false,
+        statusMessage: "Loading...",
+        daysLeft: null
+    });
     const [is3DLoaded, setIs3DLoaded] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [is3DStarted, setIs3DStarted] = useState(false);
     const [shouldRender3D, setShouldRender3D] = useState(false);
-    const [reducedQuality, setReducedQuality] = useState(false);
     const [contentLoaded, setContentLoaded] = useState(false);
+    const [techelonsContent, setTechelonsContent] = useState(DEFAULT_CONTENT);
+    const [hasError, setHasError] = useState(false);
 
-    // Handle registration button click
-    const handleRegistration = useCallback(() => {
-        if (registrationOpen) {
-            router.push("/techelonsregistration");
-        } else {
-            router.push("/registrationclosed");
-        }
-    }, [registrationOpen, router]);
+    // Handle responsive design
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
 
-    // Handle 3D scene load completion
-    const handle3DLoad = useCallback(() => {
-        setIs3DLoaded(true);
-        setIsLoading(false);
+        const updateDimensions = () => {
+            setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+        };
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions, { passive: true });
+
+        return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
-    // Handle learn more button click
-    const handleLearnMore = useCallback(() => {
-        window.location.href = "/techelons#events";
+    // Fetch content and registration status
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await fetchTechelonsData();
+
+                // Update content if available
+                if (data?.uiContent) {
+                    setTechelonsContent(data.uiContent);
+                }
+
+                // Update registration status if available
+                if (data?.festInfo) {
+                    const regStatus = data.festInfo.registrationEnabled;
+
+                    let daysLeft = null;
+                    let statusMessage = regStatus ? "Registration Open" : "Registration Closed";
+
+                    if (regStatus && data.festInfo.dates?.registrationDeadline) {
+                        const deadlineDate = new Date(data.festInfo.dates.registrationDeadline);
+                        const currentDate = new Date();
+
+                        // Reset time part for accurate day calculation
+                        deadlineDate.setHours(0, 0, 0, 0);
+                        currentDate.setHours(0, 0, 0, 0);
+
+                        // Calculate difference in days
+                        const timeDiff = deadlineDate.getTime() - currentDate.getTime();
+                        daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                        // Update status message with days left
+                        if (daysLeft > 0) {
+                            statusMessage = `Registration Open • ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
+                        } else if (daysLeft === 0) {
+                            statusMessage = "Registration Open • Last day!";
+                        }
+                    }
+
+                    setRegistrationStatus({
+                        registrationOpen: regStatus,
+                        statusMessage,
+                        daysLeft
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setHasError(true);
+                setRegistrationStatus({
+                    registrationOpen: false,
+                    statusMessage: "Registration Status Unavailable",
+                    daysLeft: null
+                });
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Simulate content loading
+    useEffect(() => {
+        const contentTimer = setTimeout(() => {
+            setContentLoaded(true);
+        }, CONTENT_LOADING_TIMEOUT);
+
+        return () => clearTimeout(contentTimer);
     }, []);
 
     // Use IntersectionObserver to only load 3D when visible
     useEffect(() => {
         if (typeof window === 'undefined' || isMobile) return;
-        
+
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
@@ -157,325 +182,258 @@ const TechelonsMain = () => {
             },
             { threshold: 0.1, rootMargin: '100px' }
         );
-        
+
         const container = document.querySelector('.techelons-3d-container');
         if (container) {
             observer.observe(container);
         }
-        
+
         return () => observer.disconnect();
     }, [isMobile]);
 
-    // Simulate content loading with a shorter timeout to match TechelonsSchedule
+    // Effect to force set the 3D loaded state after a timeout if it hasn't been set
     useEffect(() => {
-        const contentTimer = setTimeout(() => {
-            setContentLoaded(true);
-        }, CONTENT_LOADING_TIMEOUT);
-        
-        return () => clearTimeout(contentTimer);
+        let timer;
+        if (shouldRender3D && is3DStarted && !is3DLoaded) {
+            timer = setTimeout(() => {
+                setIs3DLoaded(true);
+            }, 5000); // Force mark as loaded after 5 seconds
+        }
+        return () => clearTimeout(timer);
+    }, [shouldRender3D, is3DStarted, is3DLoaded]);
+
+    // Check if Spline canvas is in the DOM as another way to detect loading
+    useEffect(() => {
+        if (shouldRender3D && !is3DLoaded) {
+            const checkSplineLoaded = setInterval(() => {
+                // Check for Spline canvas in the DOM
+                const splineCanvas = document.querySelector('.techelons-3d-container canvas');
+                if (splineCanvas) {
+                    setIs3DLoaded(true);
+                    clearInterval(checkSplineLoaded);
+                }
+            }, 500);
+
+            return () => clearInterval(checkSplineLoaded);
+        }
+    }, [shouldRender3D, is3DLoaded]);
+
+    // Handler functions
+    const handleRegistration = useCallback(() => {
+        router.push(registrationStatus.registrationOpen ? "/techelonsregistration" : "/registrationclosed");
+    }, [registrationStatus.registrationOpen, router]);
+
+    const handle3DLoad = useCallback(() => {
+        setIs3DLoaded(true);
     }, []);
 
-    // Set a timeout to hide loading state even if 3D doesn't load
-    useEffect(() => {
-        if (isMobile) {
-            setIsLoading(false);
-            return;
+    const handleLearnMore = useCallback(() => {
+        if (typeof window !== 'undefined') {
+            // Get the target element and smooth scroll to it
+            document.getElementById('events').scrollIntoView({ behavior: 'smooth' });
         }
-        
-        const loadingTimer = setTimeout(() => {
-            if (!is3DLoaded) setIsLoading(false);
-        }, LOADING_TIMEOUT);
+    }, []);
 
-        return () => clearTimeout(loadingTimer);
-    }, [is3DLoaded, isMobile]);
-
-    // Check device performance to determine if we should reduce 3D quality
+    // Mark that 3D has started loading
     useEffect(() => {
-        if (typeof window === 'undefined' || isMobile) return;
-        
-        const checkPerformance = () => {
-            if (isTablet) {
-                setReducedQuality(true);
-                return;
-            }
-            
-            if (navigator.deviceMemory && navigator.deviceMemory < 4) {
-                setReducedQuality(true);
-                return;
-            }
-            
-            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
-                setReducedQuality(true);
-                return;
-            }
-            
-            try {
-                const canvas = document.createElement('canvas');
-                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                
-                if (!gl) {
-                    setReducedQuality(true);
-                    return;
-                }
-                
-                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                if (debugInfo) {
-                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    if (renderer.includes('Intel') || 
-                        renderer.includes('AMD') && !renderer.includes('Radeon') ||
-                        renderer.includes('Apple') ||
-                        renderer.toLowerCase().includes('mobile')) {
-                        setReducedQuality(true);
-                        return;
-                    }
-                }
-            } catch (e) {
-                setReducedQuality(true);
-            }
+        if (shouldRender3D) {
+            setIs3DStarted(true);
+        }
+    }, [shouldRender3D]);
+
+    // Status badge styling
+    const statusBadgeStyle = useMemo(() => {
+        const { registrationOpen, daysLeft } = registrationStatus;
+        const isUrgent = daysLeft !== null && daysLeft <= 3 && daysLeft >= 0;
+
+        return {
+            container: `inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-full ${registrationOpen
+                ? isUrgent
+                    ? "bg-yellow-50 border border-yellow-200"
+                    : "bg-green-50 border border-green-200"
+                : "bg-red-50 border border-red-200"
+                }`,
+            indicator: `w-2 h-2 rounded-full ${registrationOpen
+                ? isUrgent
+                    ? "bg-yellow-500 animate-pulse"
+                    : "bg-green-500 animate-pulse"
+                : "bg-red-500 animate-pulse"
+                }`,
+            text: `font-bold text-sm md:text-md ${registrationOpen
+                ? isUrgent
+                    ? "text-yellow-600"
+                    : "text-green-600"
+                : "text-red-600"
+                }`
         };
-        
-        checkPerformance();
-    }, [isMobile, isTablet]);
-
-    // Memoize the status badge style
-    const statusBadgeStyle = useMemo(() => ({
-        container: `inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-full ${
-            registrationOpen ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"
-        }`,
-        indicator: `w-2 h-2 rounded-full ${
-            registrationOpen ? "bg-green-500" : "bg-red-500"
-        } animate-pulse`,
-        text: `font-bold text-sm md:text-md ${
-            registrationOpen ? "text-green-600" : "text-red-600"
-        }`
-    }), [registrationOpen]);
-
-    // Memoize the 3D scene
-    const scene3D = useMemo(() => {
-        if (isMobile || !shouldRender3D) return null;
-        
-        const sceneUrl = reducedQuality 
-            ? "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            : "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode";
-        
-        return (
-            !isLoading && (
-                <SplineScene
-                    scene={sceneUrl}
-                    className="w-full h-full"
-                    onLoad={handle3DLoad}
-                />
-            )
-        );
-    }, [isLoading, handle3DLoad, isMobile, shouldRender3D, reducedQuality]);
-
-    // Memoize the spotlight effects
-    const spotlightEffects = useMemo(() => (
-        <>
-            <div className="absolute top-1/4 left-1/4 w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 lg:w-96 lg:h-96 bg-blue-500 rounded-full opacity-20 blur-3xl" aria-hidden="true"></div>
-            <div className="absolute top-1/2 right-1/4 w-32 h-32 sm:w-40 sm:h-40 md:w-56 md:h-56 lg:w-64 lg:h-64 bg-purple-500 rounded-full opacity-20 blur-3xl" aria-hidden="true"></div>
-        </>
-    ), []);
-
-    // Memoize the 3D container
-    const scene3DContainer = useMemo(() => {
-        if (isMobile) return null;
-        
-        return (
-            <div className="h-full flex techelons-3d-container">
-                {isLoading || !contentLoaded ? (
-                    <Scene3DSkeleton />
-                ) : (
-                    <div className="relative w-full h-full bg-gradient-to-br from-black to-indigo-950 rounded-2xl overflow-hidden shadow-2xl border border-indigo-900/20">
-                        {spotlightEffects}
-
-                        <div className="absolute inset-0">
-                            <Suspense fallback={<Scene3DFallback />}>
-                                {scene3D}
-                            </Suspense>
-                        </div>
-
-                        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 z-100 pointer-events-none">
-                            <div className="text-white text-center">
-                                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">Tech<span className="text-blue-400">elons</span></div>
-                                <div className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-200 mb-2 sm:mb-3 md:mb-4 lg:mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">April 2025</div>
-                                {isLoading && (
-                                    <div className="text-xs md:text-sm bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent font-medium tracking-wide animate-pulse">
-                                        Interactive 3D Experience Loading
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    }, [isMobile, scene3D, isLoading, spotlightEffects, contentLoaded]);
-
-    // Memoize the features section
-    const featuresSection = useMemo(() => (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mt-6 sm:mt-8 md:mt-10 lg:mt-12">
-            {!contentLoaded ? (
-                <>
-                    <FeatureCardSkeleton />
-                    <FeatureCardSkeleton />
-                    <FeatureCardSkeleton />
-                </>
-            ) : (
-                FEATURES.map((feature, index) => (
-                    <FeatureCard
-                        key={`feature-${index}`}
-                        icon={feature.icon}
-                        title={feature.title}
-                        description={feature.description}
-                    />
-                ))
-            )}
-        </div>
-    ), [contentLoaded]);
-
-    // Mobile-specific 3D alternative
-    const mobileBanner = useMemo(() => {
-        if (!isMobile) return null;
-        
-        return (
-            <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
-                {!contentLoaded ? (
-                    <div className="relative bg-gradient-to-br from-black to-indigo-950 py-10 px-4">
-                        <Skeleton className="h-8 w-48 mx-auto mb-2 bg-white/20" />
-                        <Skeleton className="h-4 w-32 mx-auto mb-2 bg-white/20" />
-                        <Skeleton className="h-4 w-64 mx-auto bg-white/20" />
-                    </div>
-                ) : (
-                    <div className="relative bg-gradient-to-br from-black to-indigo-950 py-10 px-4">
-                        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500 rounded-full opacity-20 blur-3xl" aria-hidden="true"></div>
-                        <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-purple-500 rounded-full opacity-20 blur-3xl" aria-hidden="true"></div>
-                        
-                        <div className="relative text-center">
-                            <div className="text-3xl sm:text-4xl font-bold mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white">Tech<span className="text-blue-400">elons</span></div>
-                            <div className="text-base sm:text-lg text-blue-200 mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">April 2025</div>
-                            <div className="text-white/80 text-sm">Shivaji College's Premier Tech Fest</div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    }, [isMobile, contentLoaded]);
-
-    // Memoize the about section
-    const aboutSection = useMemo(() => (
-        !contentLoaded ? (
-            <AboutSectionSkeleton />
-        ) : (
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 shadow-xl border border-gray-100">
-                <h2 className="text-lg sm:text-xl md:text-2xl text-center font-bold text-gray-900 mb-2 sm:mb-3">About Techelons</h2>
-                <p className="text-gray-600 text-xs sm:text-sm md:text-base">
-                    Techelons is the annual tech fest by Websters, the CS Society of Shivaji College, DU. It's where students showcase technical skills through competitions, hackathons, and coding challenges.
-                </p>
-                <hr className="my-2" />
-                <p className="text-gray-600 text-xs sm:text-sm md:text-base">
-                    Beyond competitions, Techelons features expert-led seminars on emerging tech and industry trends. The fest promotes networking and collaboration among students and professionals in a celebration of technological innovation.
-                </p>
-            </div>
-        )
-    ), [contentLoaded]);
-
-    // Memoize the explore section
-    const exploreSection = useMemo(() => (
-        !contentLoaded ? (
-            <ExploreSectionSkeleton />
-        ) : (
-            <div className="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 shadow-xl">
-                <h2 className="text-lg sm:text-xl md:text-2xl text-center font-bold mb-2 sm:mb-3">Explore the Future of Technology</h2>
-                <p className="text-indigo-100 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
-                    Join us for two days of innovation, competition, and creativity at Shivaji College.
-                    Showcase your skills and connect with tech enthusiasts from across the nation.
-                </p>
-
-                <div className="flex flex-col xs:flex-row justify-center items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
-                    <button
-                        onClick={handleRegistration}
-                        className="w-full xs:w-auto bg-white text-indigo-800 py-2 px-3 sm:py-2 sm:px-4 md:py-2.5 md:px-5 text-sm sm:text-base font-semibold rounded-full shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 hover:bg-white/90 active:transform active:scale-95"
-                        aria-label={registrationOpen ? "Register Now" : "Registration Closed"}
-                    >
-                        {registrationOpen ? "Register Now" : "Registration Closed"}
-                    </button>
-                    <button
-                        onClick={handleLearnMore}
-                        className="w-full xs:w-auto text-center bg-indigo-700/50 text-white py-2 px-3 sm:py-2 sm:px-4 md:py-2.5 md:px-5 text-sm sm:text-base font-semibold rounded-full border border-indigo-500/30 hover:bg-indigo-700/70 transition-all duration-300 active:transform active:scale-95"
-                        aria-label="Learn More About Events"
-                    >
-                        Explore Events
-                    </button>
-                </div>
-            </div>
-        )
-    ), [handleRegistration, handleLearnMore, registrationOpen, contentLoaded]);
-
-    // Memoize the heading section
-    const headingSection = useMemo(() => (
-        <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-16">
-            {!contentLoaded ? (
-                <>
-                    <div className="inline-block relative">
-                        <Skeleton className="h-12 sm:h-14 md:h-16 lg:h-20 w-64 sm:w-72 md:w-80 lg:w-96 mx-auto" />
-                        <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-blue-600/0 via-purple-600 to-indigo-600/0 blur-sm" aria-hidden="true"></div>
-                    </div>
-                    <Skeleton className="h-6 w-full max-w-2xl mx-auto mt-4" />
-                </>
-            ) : (
-                <>
-                    <div className="inline-block relative">
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 leading-none">
-                            Techelons'25
-                        </h1>
-                        <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-blue-600/0 via-purple-600 to-indigo-600/0 blur-sm" aria-hidden="true"></div>
-                    </div>
-                    <p className="mt-3 sm:mt-4 md:mt-5 lg:mt-6 text-gray-700 text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto">
-                        Shivaji College's premier technical festival, where innovation meets creativity.
-                    </p>
-                </>
-            )}
-        </div>
-    ), [contentLoaded]);
+    }, [registrationStatus]);
 
     return (
         <section className="relative py-6 sm:py-8 md:py-10 overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-                {/* Top badge */}
+                {hasError && (
+                    <StatusMessage 
+                        message="Using local content due to connection issues. Please refresh to try again." 
+                        type="warning" 
+                    />
+                )}
+                
+                {/* Status Badge */}
                 <div className="flex justify-center mb-4 sm:mb-5 md:mb-6 lg:mb-8">
                     {!contentLoaded ? (
-                        <Skeleton className="h-10 w-48 rounded-full" />
+                        <TechelonsSkeleton.StatusBadge />
                     ) : (
                         <div className={statusBadgeStyle.container}>
                             <span className={statusBadgeStyle.indicator} aria-hidden="true"></span>
                             <span className={statusBadgeStyle.text}>
-                                {statusMessage}
+                                {registrationStatus.statusMessage}
                             </span>
                         </div>
                     )}
                 </div>
 
-                {/* Main heading section */}
-                {headingSection}
-
-                {/* Mobile-specific banner */}
-                {mobileBanner}
-
-                {/* Main content card */}
-                <div className={`${isMobile ? "" : isTablet ? "grid grid-cols-1" : "grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-stretch"}`}>
-                    {/* Right column: Festival information */}
-                    <div className="h-full flex flex-col space-y-4 sm:space-y-5 md:space-y-6">
-                        {aboutSection}
-                        {exploreSection}
-                    </div>
-
-                    {/* Left column: 3D Scene - only rendered for non-mobile devices */}
-                    {scene3DContainer}
+                {/* Main Heading */}
+                <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-16">
+                    {!contentLoaded ? (
+                        <TechelonsSkeleton.Heading />
+                    ) : (
+                        <>
+                            <div className="inline-block relative">
+                                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 leading-none">
+                                    {techelonsContent.title}
+                                </h1>
+                                <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-blue-600/0 via-purple-600 to-indigo-600/0 blur-sm" aria-hidden="true"></div>
+                            </div>
+                            <p className="mt-3 sm:mt-4 md:mt-5 lg:mt-6 text-gray-700 text-sm sm:text-base md:text-lg lg:text-xl max-w-2xl mx-auto">
+                                {techelonsContent.subtitle}
+                            </p>
+                        </>
+                    )}
                 </div>
 
-                {/* Features section */}
-                {featuresSection}
+                {/* Mobile Banner - Only for mobile */}
+                {isMobile && (
+                    <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
+                        {!contentLoaded ? (
+                            <TechelonsSkeleton.MobileBanner />
+                        ) : (
+                            <div className="relative bg-gradient-to-br from-black to-indigo-950 py-10 px-4">
+                                <SpotlightEffects />
+                                <div className="relative text-center">
+                                    <div className="text-3xl sm:text-4xl font-bold mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] text-white">Tech<span className="text-blue-400">elons</span></div>
+                                    <div className="text-base sm:text-lg text-blue-200 mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{techelonsContent.festDate}</div>
+                                    <div className="text-white/80 text-sm">Shivaji College's Premier Tech Fest</div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Main Content */}
+                <div className={`${isMobile ? "" : "grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-stretch"}`}>
+                    {/* Festival Information */}
+                    <div className="h-full flex flex-col space-y-4 sm:space-y-5 md:space-y-6">
+                        {/* About Section */}
+                        {!contentLoaded ? (
+                            <TechelonsSkeleton.AboutSection />
+                        ) : (
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 shadow-xl border border-gray-100">
+                                <h2 className="text-lg sm:text-xl md:text-2xl text-center font-bold text-gray-900 mb-2 sm:mb-3">{techelonsContent.aboutTitle}</h2>
+                                {techelonsContent.aboutParagraphs.map((paragraph, index) => (
+                                    <p key={`about-p-${index}`} className="text-gray-600 text-xs sm:text-sm md:text-base mb-2">
+                                        {paragraph}
+                                    </p>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Explore Section */}
+                        {!contentLoaded ? (
+                            <TechelonsSkeleton.ExploreSection />
+                        ) : (
+                            <div className="bg-gradient-to-br from-indigo-900 to-blue-900 text-white rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 shadow-xl">
+                                <h2 className="text-lg sm:text-xl md:text-2xl text-center font-bold mb-2 sm:mb-3">{techelonsContent.exploreTitle}</h2>
+                                <p className="text-indigo-100 mb-3 sm:mb-4 text-xs sm:text-sm md:text-base">
+                                    {techelonsContent.exploreDescription}
+                                </p>
+
+                                <div className="flex flex-col xs:flex-row justify-center items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
+                                    <button
+                                        onClick={handleRegistration}
+                                        className="w-full xs:w-auto bg-white text-indigo-800 py-2 px-3 sm:py-2 sm:px-4 md:py-2.5 md:px-5 text-sm sm:text-base font-semibold rounded-full shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 hover:bg-white/90 active:transform active:scale-95"
+                                        aria-label={registrationStatus.registrationOpen ? "Register Now" : "Registration Closed"}
+                                    >
+                                        {registrationStatus.registrationOpen ? "Register Now" : "Registration Closed"}
+                                    </button>
+                                    <button
+                                        onClick={handleLearnMore}
+                                        className="w-full xs:w-auto text-center bg-indigo-700/50 text-white py-2 px-3 sm:py-2 sm:px-4 md:py-2.5 md:px-5 text-sm sm:text-base font-semibold rounded-full border border-indigo-500/30 hover:bg-indigo-700/70 transition-all duration-300 active:transform active:scale-95"
+                                        aria-label="Learn More About Events"
+                                    >
+                                        Explore Events
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 3D Scene Container (non-mobile only) */}
+                    {!isMobile && (
+                        <div className="h-full flex techelons-3d-container">
+                            {!contentLoaded ? (
+                                <TechelonsSkeleton.Scene3D />
+                            ) : (
+                                <div className="relative w-full h-full bg-gradient-to-br from-black to-indigo-950 rounded-2xl overflow-hidden shadow-2xl border border-indigo-900/20">
+                                    <SpotlightEffects />
+
+                                    <div className="absolute inset-0">
+                                        <Suspense fallback={<Scene3DFallback />}>
+                                            {shouldRender3D && (
+                                                <SplineScene
+                                                    scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                                                    className="w-full h-full"
+                                                    onLoad={handle3DLoad}
+                                                />
+                                            )}
+                                        </Suspense>
+                                    </div>
+
+                                    <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 z-10 pointer-events-none">
+                                        <div className="text-white text-center">
+                                            <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">Tech<span className="text-blue-400">elons</span></div>
+                                            <div className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-200 mb-2 sm:mb-3 md:mb-4 lg:mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{techelonsContent.festDate}</div>
+                                            {shouldRender3D && !is3DLoaded && (
+                                                <div className="text-xs md:text-sm bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent font-medium tracking-wide animate-pulse">
+                                                    Interactive 3D Experience Loading
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Features */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mt-6 sm:mt-8 md:mt-10 lg:mt-12">
+                    {!contentLoaded ? (
+                        <>
+                            <TechelonsSkeleton.FeatureCard />
+                            <TechelonsSkeleton.FeatureCard />
+                            <TechelonsSkeleton.FeatureCard />
+                        </>
+                    ) : (
+                        techelonsContent.features.map((feature, index) => (
+                            <FeatureCard
+                                key={`feature-${index}`}
+                                icon={feature.icon}
+                                title={feature.title}
+                                description={feature.description}
+                            />
+                        ))
+                    )}
+                </div>
             </div>
         </section>
     );
