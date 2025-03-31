@@ -12,14 +12,17 @@ import { fetchTechelonsData } from '@/lib/utils';
 export default function Home() {
   const [showTopButton, setShowTopButton] = useState(false);
   const [techelonsData, setTechelonsData] = useState(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const loadTechelonsData = async () => {
       try {
         const data = await fetchTechelonsData();
         setTechelonsData(data);
+        setError(false);
       } catch (error) {
         console.error('Error loading techelons data:', error);
+        setError(true);
       }
     };
 
@@ -51,7 +54,9 @@ export default function Home() {
       <Header />
       <main>
         <TechelonsMain />
-        {techelonsData && (
+        {error ? (
+          <ComingSoonPage errorMessage="Unable to load event data. Please click the refresh button below to try again." />
+        ) : techelonsData && (
           showComingSoon ? <ComingSoonPage /> : <TechelonsSchedule />
         )}
         <ScrollToTopButton visible={showTopButton} onClick={scrollToTop} />
