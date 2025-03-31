@@ -396,6 +396,39 @@ export default function ContentManagement() {
                                 />
                             </div>
                             <div className="space-y-2">
+                                <Label htmlFor="bannerInstitution">Institution</Label>
+                                <Input
+                                    id="bannerInstitution"
+                                    value={content.banner.institution}
+                                    onChange={(e) => handleInputChange("banner", "institution", e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="bannerDescription">Description</Label>
+                                <Textarea
+                                    id="bannerDescription"
+                                    value={content.banner.description}
+                                    onChange={(e) => handleInputChange("banner", "description", e.target.value)}
+                                    rows={3}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="bannerButtonText">Button Text</Label>
+                                <Input
+                                    id="bannerButtonText"
+                                    value={content.banner.buttonText}
+                                    onChange={(e) => handleInputChange("banner", "buttonText", e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="bannerButtonLink">Button Link</Label>
+                                <Input
+                                    id="bannerButtonLink"
+                                    value={content.banner.buttonLink}
+                                    onChange={(e) => handleInputChange("banner", "buttonLink", e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <Label>Banner Image</Label>
                                 <ImageUpload
                                     value={content.banner.logoImage}
