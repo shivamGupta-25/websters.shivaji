@@ -73,7 +73,8 @@ export default function AdminLayout({ children }) {
             }
 
             toast.success("Logged out successfully");
-            router.push("/admin/login");
+            // Force a hard navigation to ensure cookies are cleared properly
+            window.location.href = "/admin/login";
         } catch (error) {
             toast.error("Failed to logout");
         }

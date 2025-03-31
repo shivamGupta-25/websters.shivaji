@@ -44,8 +44,8 @@ export async function POST(request) {
         // Set secure cookie
         response.cookies.set('admin_session', sessionToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // More reliable than checking headers
-            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'lax',
             path: '/',
             maxAge: 2 * 60 * 60 // 2 hours
         });

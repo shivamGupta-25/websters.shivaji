@@ -28,7 +28,14 @@ export function middleware(request) {
         // Validate the session token
         try {
             const decodedToken = Buffer.from(sessionToken, 'base64').toString();
-            const [username, timestamp] = decodedToken.split('|');
+            // Check for proper format - should have at least 3 parts after splitting by |
+            const tokenParts = decodedToken.split('|');
+            if (tokenParts.length < 3) {
+                console.error('Invalid token format in admin session, redirecting to login');
+                return NextResponse.redirect(new URL('/admin/login', request.url));
+            }
+            
+            const [username, timestamp, randomValue] = tokenParts;
             
             // Check if the token is expired (2 hours)
             if (Date.now() - parseInt(timestamp) > 2 * 60 * 60 * 1000) {
