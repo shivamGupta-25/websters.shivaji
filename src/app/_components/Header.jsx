@@ -48,11 +48,11 @@ const NAV_LINKS = [
 
 // CSS classes using Tailwind composition
 const STYLES = {
-    desktopLink: "text-sm lg:text-base font-semibold text-gray-900 hover:text-gray-600 hover:underline transition-all duration-300",
-    mobileLink: "block text-lg font-semibold text-gray-900 hover:text-gray-600 hover:underline transition-all duration-300",
-    registerButton: "bg-gray-900 text-white py-2 px-4 text-sm lg:text-base font-bold rounded-full shadow-md hover:bg-gray-800 transition-all duration-300",
-    mobileRegisterButton: "w-full bg-gray-900 text-white font-bold py-3 rounded-full shadow-md",
-    menuButton: "md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200",
+    desktopLink: "text-xs sm:text-sm lg:text-base font-semibold text-gray-900 hover:text-gray-600 hover:underline transition-all duration-300",
+    mobileLink: "block text-base sm:text-lg font-semibold text-gray-900 hover:text-gray-600 hover:underline transition-all duration-300",
+    registerButton: "bg-gray-900 text-white py-1.5 sm:py-2 px-3 sm:px-4 text-xs sm:text-sm lg:text-base font-bold rounded-full shadow-md hover:bg-gray-800 transition-all duration-300",
+    mobileRegisterButton: "w-full bg-gray-900 text-white font-bold py-2.5 sm:py-3 rounded-full shadow-md",
+    menuButton: "md:hidden p-1.5 sm:p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200",
 };
 
 // Memoized Logo component
@@ -103,21 +103,21 @@ const ErrorNotification = memo(({ visible, onDismiss }) => {
             animate={{ y: '0%', opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-50 p-4"
+            className="fixed bottom-0 left-0 right-0 z-50 p-2 sm:p-3 md:p-4"
         >
             <Alert variant="destructive" className="flex justify-between items-center border-yellow-400 bg-yellow-50 text-yellow-800 shadow-lg">
                 <div className="flex items-center">
-                    <ExclamationTriangleIcon className="h-5 w-5 mr-2" />
-                    <AlertDescription>
+                    <ExclamationTriangleIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                    <AlertDescription className="text-xs sm:text-sm md:text-base">
                         Unable to fetch registration status. Please refresh the page to try again.
                     </AlertDescription>
                 </div>
                 <button
                     onClick={onDismiss}
-                    className="text-sm font-medium hover:opacity-80 transition-opacity"
+                    className="text-xs sm:text-sm font-medium hover:opacity-80 transition-opacity"
                     aria-label="Dismiss"
                 >
-                    <XMarkIcon className="h-5 w-5" />
+                    <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
             </Alert>
         </motion.div>
@@ -299,15 +299,15 @@ const Header = ({ children }) => {
     return (
         <>
             <header className="bg-white w-full">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5">
+                <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4 lg:py-5">
                     <nav className="flex items-center justify-between" aria-label="Main navigation">
-                        {/* Logo */}
+                        {/* Logo - Responsive sizing */}
                         <Link href="/" className="flex-shrink-0 z-10" aria-label="Home">
-                            <Logo className="h-8 w-auto" />
+                            <Logo className="h-6 sm:h-7 md:h-8 w-auto" />
                         </Link>
 
-                        {/* Desktop Navigation Links */}
-                        <div className="hidden md:flex md:items-center md:gap-x-6 lg:gap-x-8">
+                        {/* Desktop Navigation Links - with better spacing on different screens */}
+                        <div className="hidden md:flex md:items-center md:gap-x-3 lg:gap-x-6 xl:gap-x-8">
                             {NAV_LINKS.map((link) => (
                                 <NavLink
                                     key={link.name}
@@ -320,7 +320,7 @@ const Header = ({ children }) => {
                             ))}
                         </div>
 
-                        {/* Desktop Register Button */}
+                        {/* Desktop Register Button - adjusted for smallest desktop sizes */}
                         <motion.button
                             variants={animations.buttonHover}
                             initial="initial"
@@ -332,20 +332,20 @@ const Header = ({ children }) => {
                             Register Now
                         </motion.button>
 
-                        {/* Mobile Menu Button */}
+                        {/* Mobile Menu Button - more compact on smallest screens */}
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(true)}
                             className={STYLES.menuButton}
                             aria-label="Open menu"
                         >
-                            <Bars3Icon className="h-6 w-6" />
+                            <Bars3Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                         </button>
                     </nav>
                 </div>
             </header>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu - adjusted width for different screens */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <Dialog
@@ -365,30 +365,30 @@ const Header = ({ children }) => {
                             aria-hidden="true"
                         />
 
-                        {/* Menu panel */}
+                        {/* Menu panel - responsive width and paddings */}
                         <div className="fixed inset-y-0 right-0 max-w-full flex pointer-events-none">
                             <motion.div
                                 initial={{ x: '100%' }}
                                 animate={{ x: 0 }}
                                 exit={{ x: '100%' }}
                                 transition={{ duration: 0.2 }}
-                                className="w-64 sm:w-72 bg-white px-6 py-6 shadow-lg overflow-y-auto pointer-events-auto"
+                                className="w-56 xs:w-64 sm:w-72 bg-white px-4 xs:px-5 sm:px-6 py-4 sm:py-6 shadow-lg overflow-y-auto pointer-events-auto"
                             >
                                 <div className="flex items-center justify-between">
                                     <Link href="/" onClick={() => setMobileMenuOpen(false)} aria-label="Home">
-                                        <Logo className="h-9 w-auto" />
+                                        <Logo className="h-6 sm:h-8 md:h-9 w-auto" />
                                     </Link>
                                     <button
                                         type="button"
                                         onClick={() => setMobileMenuOpen(false)}
-                                        className="p-2 text-gray-700 hover:bg-gray-200 rounded-lg"
+                                        className="p-1.5 sm:p-2 text-gray-700 hover:bg-gray-200 rounded-lg"
                                         aria-label="Close menu"
                                     >
-                                        <XMarkIcon className="h-6 w-6" />
+                                        <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                                     </button>
                                 </div>
 
-                                <nav className="mt-6 space-y-4">
+                                <nav className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
                                     {NAV_LINKS.map((link) => (
                                         <div key={link.name}>
                                             <NavLink
@@ -400,7 +400,7 @@ const Header = ({ children }) => {
                                             />
                                         </div>
                                     ))}
-                                    <hr className="border-gray-300 my-4" />
+                                    <hr className="border-gray-300 my-3 sm:my-4" />
                                     <button
                                         className={STYLES.mobileRegisterButton}
                                         onClick={() => {
@@ -417,23 +417,23 @@ const Header = ({ children }) => {
                 )}
             </AnimatePresence>
 
-            {/* Error notification */}
+            {/* Error notification - responsive text and spacing */}
             <ErrorNotification
                 visible={registrationStatus.hasError}
                 onDismiss={() => setRegistrationStatus(prev => ({ ...prev, hasError: false }))}
             />
 
-            {/* Registration Error Dialog */}
+            {/* Registration Error Dialog - automatically responsive via UI component */}
             <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
-                <AlertDialogContent>
+                <AlertDialogContent className="max-w-xs sm:max-w-sm md:max-w-md">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Registration Error</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className="text-base sm:text-lg md:text-xl">Registration Error</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm sm:text-base">
                             Unable to verify registration status. Please refresh the page and try again.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction onClick={() => window.location.reload()}>
+                        <AlertDialogAction onClick={() => window.location.reload()} className="text-sm sm:text-base">
                             Refresh Now
                         </AlertDialogAction>
                     </AlertDialogFooter>

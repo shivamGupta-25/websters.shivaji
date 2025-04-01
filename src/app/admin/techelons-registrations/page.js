@@ -149,6 +149,8 @@ export default function TechelonsRegistrationsPage() {
         <p><strong>Email:</strong> {member.email}</p>
         <p><strong>Phone:</strong> {member.phone}</p>
         <p><strong>College:</strong> {member.college}</p>
+        {member.rollNo && <p><strong>Roll No:</strong> {member.rollNo}</p>}
+        {member.course && <p><strong>Course:</strong> {member.course}</p>}
       </div>
     </div>
   );
@@ -358,8 +360,8 @@ export default function TechelonsRegistrationsPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="sm:max-w-md max-w-[95vw] p-4 sm:p-6 overflow-hidden">
-          <AlertDialogHeader>
+        <AlertDialogContent className="w-[95vw] max-w-md p-4 sm:p-6">
+          <AlertDialogHeader className="space-y-2">
             <AlertDialogTitle className="text-base sm:text-lg">Confirm Deletion</AlertDialogTitle>
             <AlertDialogDescription className="text-sm sm:text-base">
               Are you sure you want to delete this registration? This action cannot be undone.
@@ -374,11 +376,11 @@ export default function TechelonsRegistrationsPage() {
               </div>
             </div>
           )}
-          <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
-            <AlertDialogCancel className="mt-0 text-sm sm:text-base">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel className="mt-0 w-full text-sm sm:w-auto sm:text-base">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => selectedRegistration && deleteRegistration(selectedRegistration._id)}
-              className="bg-destructive text-sm hover:bg-destructive/90 sm:text-base"
+              className="w-full bg-destructive text-sm hover:bg-destructive/90 sm:w-auto sm:text-base"
             >
               Delete
             </AlertDialogAction>
@@ -388,8 +390,8 @@ export default function TechelonsRegistrationsPage() {
 
       {/* Flush Confirmation Alert Dialog */}
       <AlertDialog open={showFlushDialog} onOpenChange={setShowFlushDialog}>
-        <AlertDialogContent className="sm:max-w-md max-w-[95vw] p-4 sm:p-6 overflow-hidden">
-          <AlertDialogHeader>
+        <AlertDialogContent className="w-[95vw] max-w-md p-4 sm:p-6">
+          <AlertDialogHeader className="space-y-2">
             <AlertDialogTitle className="text-base sm:text-lg">Confirm Flush All Registrations</AlertDialogTitle>
             <AlertDialogDescription className="text-sm sm:text-base">
               Are you sure you want to delete ALL registrations? This action cannot be undone.
@@ -400,11 +402,11 @@ export default function TechelonsRegistrationsPage() {
               This will permanently delete all {registrations.length} registrations.
             </p>
           </div>
-          <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
-            <AlertDialogCancel className="mt-0 text-sm sm:text-base">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+            <AlertDialogCancel className="mt-0 w-full text-sm sm:w-auto sm:text-base">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={flushAllRegistrations}
-              className="bg-destructive text-sm hover:bg-destructive/90 sm:text-base"
+              className="w-full bg-destructive text-sm hover:bg-destructive/90 sm:w-auto sm:text-base"
             >
               Delete All
             </AlertDialogAction>
@@ -414,60 +416,107 @@ export default function TechelonsRegistrationsPage() {
 
       {/* Registration Details Dialog */}
       <AlertDialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <AlertDialogContent className="sm:max-w-3xl max-w-[95vw] w-auto h-auto max-h-[90vh] p-4 sm:p-6 overflow-y-auto">
-          <AlertDialogHeader>
+        <AlertDialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] lg:min-w-[80vw] max-w-4xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+          <AlertDialogHeader className="space-y-2">
             <AlertDialogTitle className="text-base sm:text-lg">Registration Details</AlertDialogTitle>
           </AlertDialogHeader>
           {selectedRegistration && (
-            <div className="space-y-4 text-sm sm:space-y-6 sm:text-base">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <h3 className="mb-1 text-base font-semibold sm:mb-2 sm:text-lg">Event Information</h3>
+            <div className="space-y-4 sm:space-y-6">
+              {/* Event Information Section */}
+              <div className="rounded-lg border p-3 sm:p-4">
+                <h3 className="mb-2 text-base font-semibold sm:mb-3 sm:text-lg">Event Information</h3>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
                   <div className="space-y-1 sm:space-y-2">
                     <p><strong>Event ID:</strong> {selectedRegistration.eventId}</p>
                     <p><strong>Event Name:</strong> {selectedRegistration.eventName}</p>
                     <p><strong>Registration Date:</strong> {formatDate(selectedRegistration.registrationDate)}</p>
+                  </div>
+                  <div className="space-y-1 sm:space-y-2">
                     <p><strong>Team Event:</strong> {selectedRegistration.isTeamEvent ? 'Yes' : 'No'}</p>
                     {selectedRegistration.isTeamEvent && selectedRegistration.teamName && (
                       <p><strong>Team Name:</strong> {selectedRegistration.teamName}</p>
                     )}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="mb-1 text-base font-semibold sm:mb-2 sm:text-lg">Main Participant</h3>
-                  <div className="space-y-1 sm:space-y-2">
-                    <p><strong>Name:</strong> {selectedRegistration.mainParticipant.name}</p>
-                    <p className="break-words"><strong>Email:</strong> {selectedRegistration.mainParticipant.email}</p>
-                    <p><strong>Phone:</strong> {selectedRegistration.mainParticipant.phone}</p>
-                    <p><strong>College:</strong> {selectedRegistration.mainParticipant.college}</p>
-                    {selectedRegistration.mainParticipant.otherCollege && (
-                      <p><strong>Other College:</strong> {selectedRegistration.mainParticipant.otherCollege}</p>
+                    {selectedRegistration.teamSize && (
+                      <p><strong>Team Size:</strong> {selectedRegistration.teamSize}</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {selectedRegistration.teamMembers?.length > 0 && (
-                <div>
-                  <h3 className="mb-1 text-base font-semibold sm:mb-2 sm:text-lg">Team Members</h3>
+              {/* Main Participant Section */}
+              <div className="rounded-lg border p-3 sm:p-4">
+                <h3 className="mb-2 text-base font-semibold sm:mb-3 sm:text-lg">Main Participant</h3>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+                  <div className="space-y-1 sm:space-y-2">
+                    <p><strong>Name:</strong> {selectedRegistration.mainParticipant.name}</p>
+                    <p className="break-words"><strong>Email:</strong> {selectedRegistration.mainParticipant.email}</p>
+                    <p><strong>Phone:</strong> {selectedRegistration.mainParticipant.phone}</p>
+                    {selectedRegistration.mainParticipant.rollNo && (
+                      <p><strong>Roll No:</strong> {selectedRegistration.mainParticipant.rollNo}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1 sm:space-y-2">
+                    <p><strong>College:</strong> {selectedRegistration.mainParticipant.college}</p>
+                    {selectedRegistration.mainParticipant.otherCollege && (
+                      <p><strong>Other College:</strong> {selectedRegistration.mainParticipant.otherCollege}</p>
+                    )}
+                    {selectedRegistration.mainParticipant.year && (
+                      <p><strong>Year:</strong> {selectedRegistration.mainParticipant.year}</p>
+                    )}
+                    {selectedRegistration.mainParticipant.course && (
+                      <p><strong>Course:</strong> {selectedRegistration.mainParticipant.course}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
+              {/* Team Members Section */}
+              {selectedRegistration.teamMembers?.length > 0 && (
+                <div className="rounded-lg border p-3 sm:p-4">
+                  <h3 className="mb-2 text-base font-semibold sm:mb-3 sm:text-lg">Team Members</h3>
+                  
                   {/* Mobile view - Card style layout */}
                   <div className="sm:hidden">
-                    {selectedRegistration.teamMembers.map((member, index) => (
-                      <TeamMemberMobileCard key={index} member={member} index={index} />
-                    ))}
+                    <div className="space-y-3">
+                      {selectedRegistration.teamMembers.map((member, index) => (
+                        <div key={index} className="rounded-md border p-2 sm:p-3">
+                          <h4 className="mb-2 font-medium">Member {index + 1}</h4>
+                          <div className="space-y-1 sm:space-y-2">
+                            <p><strong>Name:</strong> {member.name}</p>
+                            <p className="break-words"><strong>Email:</strong> {member.email}</p>
+                            <p><strong>Phone:</strong> {member.phone}</p>
+                            {member.rollNo && (
+                              <p><strong>Roll No:</strong> {member.rollNo}</p>
+                            )}
+                            <p><strong>College:</strong> {member.college}</p>
+                            {member.otherCollege && (
+                              <p><strong>Other College:</strong> {member.otherCollege}</p>
+                            )}
+                            {member.year && (
+                              <p><strong>Year:</strong> {member.year}</p>
+                            )}
+                            {member.course && (
+                              <p><strong>Course:</strong> {member.course}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Desktop view - Table */}
                   <div className="hidden sm:block">
-                    <div className="w-full">
-                      <Table className="table-fixed">
+                    <div className="w-full overflow-x-auto">
+                      <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-1/4">Name</TableHead>
-                            <TableHead className="w-1/3">Email</TableHead>
-                            <TableHead className="w-1/6">Phone</TableHead>
-                            <TableHead className="w-1/4">College</TableHead>
+                            <TableHead className="w-[12%]">Name</TableHead>
+                            <TableHead className="w-[20%]">Email</TableHead>
+                            <TableHead className="w-[12%]">Phone</TableHead>
+                            <TableHead className="w-[10%]">Roll No</TableHead>
+                            <TableHead className="w-[18%]">College</TableHead>
+                            <TableHead className="w-[10%]">Year</TableHead>
+                            <TableHead className="w-[18%]">Course</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -476,7 +525,12 @@ export default function TechelonsRegistrationsPage() {
                               <TableCell className="truncate">{member.name}</TableCell>
                               <TableCell className="break-words">{member.email}</TableCell>
                               <TableCell className="truncate">{member.phone}</TableCell>
-                              <TableCell className="truncate">{member.college}</TableCell>
+                              <TableCell className="truncate">{member.rollNo || '-'}</TableCell>
+                              <TableCell className="truncate">
+                                {member.otherCollege || member.college}
+                              </TableCell>
+                              <TableCell className="truncate">{member.year || '-'}</TableCell>
+                              <TableCell className="truncate">{member.course || '-'}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -486,32 +540,40 @@ export default function TechelonsRegistrationsPage() {
                 </div>
               )}
 
-              {selectedRegistration.query && (
-                <div>
-                  <h3 className="mb-1 text-base font-semibold sm:mb-2 sm:text-lg">Query</h3>
-                  <p className="break-words">{selectedRegistration.query}</p>
+              {/* Additional Information Section */}
+              <div className="rounded-lg border p-3 sm:p-4">
+                <h3 className="mb-2 text-base font-semibold sm:mb-3 sm:text-lg">Additional Information</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  {selectedRegistration.query && (
+                    <div>
+                      <p className="font-medium mb-1">Query:</p>
+                      <div className="bg-muted p-2 sm:p-3 rounded-md">
+                        <p className="break-words whitespace-pre-wrap text-sm sm:text-base">{selectedRegistration.query}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedRegistration.collegeIdUrl && (
+                    <div>
+                      <p className="font-medium mb-1">College ID:</p>
+                      <div className="rounded-md border p-2">
+                        <a
+                          href={selectedRegistration.collegeIdUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-blue-600 hover:underline text-sm sm:text-base"
+                        >
+                          <span>View College ID</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {selectedRegistration.collegeIdUrl && (
-                <div>
-                  <h3 className="mb-1 text-base font-semibold sm:mb-2 sm:text-lg">College ID</h3>
-                  <div className="rounded-md border p-2">
-                    <a
-                      href={selectedRegistration.collegeIdUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-blue-600 hover:underline"
-                    >
-                      <span>View College ID</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-                    </a>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           )}
-          <AlertDialogFooter>
+          <AlertDialogFooter className="mt-4 sm:mt-6">
             <AlertDialogCancel className="w-full text-sm sm:w-auto sm:text-base">Close</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
