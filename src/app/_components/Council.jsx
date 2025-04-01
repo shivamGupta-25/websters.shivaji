@@ -226,6 +226,7 @@ const Council = () => {
     const [mounted, setMounted] = useState(false);
     const [councilData, setCouncilData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [usingFallback, setUsingFallback] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -239,11 +240,13 @@ const Council = () => {
                 } else {
                     // Fall back to static content if API fails or returns empty data
                     setCouncilData(siteContent.council);
+                    setUsingFallback(true);
                 }
             } catch (err) {
                 console.error('Error loading council data:', err);
                 // Fall back to static content on error
                 setCouncilData(siteContent.council);
+                setUsingFallback(true);
             } finally {
                 setLoading(false);
             }
@@ -279,6 +282,11 @@ const Council = () => {
                     >
                         {description}
                     </motion.p>
+                    {usingFallback && (
+                        <div className="text-amber-600 text-sm mt-2 text-center">
+                            Using local fallback content due to connection issues. Please refresh to try again.
+                        </div>
+                    )}
                 </div>
 
                 {mounted && (

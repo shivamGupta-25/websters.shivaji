@@ -13,22 +13,9 @@ import {
     Alert,
     AlertDescription
 } from "@/components/ui/alert";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 // Animation configurations
 const animations = {
-    fadeIn: {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.4 } }
-    },
     buttonHover: {
         initial: { scale: 1 },
         hover: { scale: 1.05 },
@@ -93,10 +80,19 @@ const NavLink = memo(({ href, name, onClick, className, isCurrent }) => {
 });
 NavLink.displayName = 'NavLink';
 
-// Error notification component
-const ErrorNotification = memo(({ visible, onDismiss }) => {
-    if (!visible) return null;
-
+// Notification component for all system messages
+const SystemNotification = memo(({ notification, onDismiss, onAction }) => {
+    if (!notification) return null;
+    
+    const { type, message, actionLabel } = notification;
+    
+    // Colors based on notification type
+    const styles = {
+        error: "border-red-400 bg-red-50 text-red-800",
+        warning: "border-yellow-400 bg-yellow-50 text-yellow-800",
+        info: "border-blue-400 bg-blue-50 text-blue-800"
+    };
+    
     return (
         <motion.div
             initial={{ y: '100%', opacity: 0 }}
@@ -105,56 +101,119 @@ const ErrorNotification = memo(({ visible, onDismiss }) => {
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="fixed bottom-0 left-0 right-0 z-50 p-2 sm:p-3 md:p-4"
         >
-            <Alert variant="destructive" className="flex justify-between items-center border-yellow-400 bg-yellow-50 text-yellow-800 shadow-lg">
+            <Alert className={`flex justify-between items-center shadow-lg ${styles[type] || styles.info}`}>
                 <div className="flex items-center">
                     <ExclamationTriangleIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
                     <AlertDescription className="text-xs sm:text-sm md:text-base">
-                        Unable to fetch registration status. Please refresh the page to try again.
+                        {message}
                     </AlertDescription>
                 </div>
-                <button
-                    onClick={onDismiss}
-                    className="text-xs sm:text-sm font-medium hover:opacity-80 transition-opacity"
-                    aria-label="Dismiss"
-                >
-                    <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                    {actionLabel && (
+                        <button
+                            onClick={onAction}
+                            className={`text-xs sm:text-sm font-medium px-2 py-1 rounded transition-colors ${
+                                type === 'error' ? 'bg-red-100 hover:bg-red-200' : 
+                                type === 'warning' ? 'bg-yellow-100 hover:bg-yellow-200' : 
+                                'bg-blue-100 hover:bg-blue-200'
+                            }`}
+                        >
+                            {actionLabel}
+                        </button>
+                    )}
+                    <button
+                        onClick={onDismiss}
+                        className="text-xs sm:text-sm font-medium hover:opacity-80 transition-opacity"
+                        aria-label="Dismiss"
+                    >
+                        <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                </div>
             </Alert>
         </motion.div>
     );
 });
-ErrorNotification.displayName = 'ErrorNotification';
+SystemNotification.displayName = 'SystemNotification';
 
 const Header = ({ children }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [registrationStatus, setRegistrationStatus] = useState({
         techelons: false,
         workshop: false,
-        hasError: false
+        loading: true
     });
-    const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+    const [notification, setNotification] = useState(null);
     const router = useRouter();
     const pathname = usePathname();
     const isHomePage = pathname === '/';
 
-    // Fetch registration status 
+    // Helper to show notifications
+    const showNotification = useCallback((type, message, actionLabel = null) => {
+        setNotification({
+            type,
+            message,
+            actionLabel
+        });
+    }, []);
+
+    // Clear notification
+    const clearNotification = useCallback(() => {
+        setNotification(null);
+    }, []);
+    
+    // Handle refresh action
+    const handleRefresh = useCallback(() => {
+        window.location.reload();
+    }, []);
+
+    // Fetch registration status with simplified error handling
     const fetchRegistrationStatus = useCallback(async () => {
         try {
+            setRegistrationStatus(prev => ({ ...prev, loading: true }));
+            
+            // Try to fetch data
             const [techelonsData, siteContent] = await Promise.all([
                 fetchTechelonsData(),
                 fetchSiteContent()
             ]);
-
+            
+            // Check if we have valid data
+            const hasTechelonsData = techelonsData && techelonsData.festInfo;
+            const hasSiteContent = siteContent && siteContent.workshop;
+            
+            // Update registration status with available data
             setRegistrationStatus({
-                techelons: techelonsData?.festInfo?.registrationEnabled || false,
-                workshop: siteContent?.workshop?.isRegistrationOpen || false,
-                hasError: false
+                techelons: hasTechelonsData ? techelonsData.festInfo.registrationEnabled : false,
+                workshop: hasSiteContent ? siteContent.workshop.isRegistrationOpen : false,
+                loading: false
             });
+            
+            // Only show error if we couldn't load any data
+            if (!hasTechelonsData && !hasSiteContent) {
+                showNotification(
+                    'error',
+                    'Unable to connect to the server. Please refresh and try again.',
+                    'Refresh'
+                );
+            } else {
+                // Clear any existing notifications on successful load
+                clearNotification();
+            }
         } catch (error) {
             console.error("Error fetching registration status:", error);
-            setRegistrationStatus(prev => ({ ...prev, hasError: true }));
+            
+            setRegistrationStatus(prev => ({ 
+                ...prev, 
+                loading: false 
+            }));
+            
+            showNotification(
+                'error',
+                'Unable to connect to the server. Please refresh and try again.',
+                'Refresh'
+            );
         }
-    }, []);
+    }, [showNotification, clearNotification]);
 
     // Initial fetch and periodic refresh
     useEffect(() => {
@@ -196,7 +255,7 @@ const Header = ({ children }) => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
         // Add a small offset to account for the header
-        const headerOffset = 8; // Smaller offset for more precise positioning
+        const headerOffset = 8;
 
         window.scrollTo({
             top: rect.top + scrollTop - headerOffset,
@@ -222,7 +281,7 @@ const Header = ({ children }) => {
             // Use replace instead of push for more reliable navigation to home with hash
             router.replace('/');
         } else {
-            // More reliable approach with requestAnimationFrame and timeout
+            // More reliable approach with timeout
             setTimeout(() => {
                 if (!scrollToSection(sectionId)) {
                     // Try again if initial attempt fails
@@ -232,10 +291,14 @@ const Header = ({ children }) => {
         }
     }, [isHomePage, router, scrollToSection]);
 
-    // Handle registration button click
+    // Handle registration button click with simplified error handling
     const handleRegistration = useCallback(() => {
-        if (registrationStatus.hasError) {
-            setAlertDialogOpen(true);
+        if (registrationStatus.loading) {
+            showNotification(
+                'error',
+                'Unable to connect to the server. Please refresh and try again.',
+                'Refresh'
+            );
             return;
         }
 
@@ -250,7 +313,7 @@ const Header = ({ children }) => {
         } else {
             router.push("/registrationclosed");
         }
-    }, [router, registrationStatus]);
+    }, [router, registrationStatus, showNotification]);
 
     // Handle section scrolling on page load
     useEffect(() => {
@@ -306,7 +369,7 @@ const Header = ({ children }) => {
                             <Logo className="h-6 sm:h-7 md:h-8 w-auto" />
                         </Link>
 
-                        {/* Desktop Navigation Links - with better spacing on different screens */}
+                        {/* Desktop Navigation Links */}
                         <div className="hidden md:flex md:items-center md:gap-x-3 lg:gap-x-6 xl:gap-x-8">
                             {NAV_LINKS.map((link) => (
                                 <NavLink
@@ -320,7 +383,7 @@ const Header = ({ children }) => {
                             ))}
                         </div>
 
-                        {/* Desktop Register Button - adjusted for smallest desktop sizes */}
+                        {/* Desktop Register Button */}
                         <motion.button
                             variants={animations.buttonHover}
                             initial="initial"
@@ -332,7 +395,7 @@ const Header = ({ children }) => {
                             Register Now
                         </motion.button>
 
-                        {/* Mobile Menu Button - more compact on smallest screens */}
+                        {/* Mobile Menu Button */}
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(true)}
@@ -345,7 +408,7 @@ const Header = ({ children }) => {
                 </div>
             </header>
 
-            {/* Mobile Menu - adjusted width for different screens */}
+            {/* Mobile Menu */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <Dialog
@@ -417,28 +480,16 @@ const Header = ({ children }) => {
                 )}
             </AnimatePresence>
 
-            {/* Error notification - responsive text and spacing */}
-            <ErrorNotification
-                visible={registrationStatus.hasError}
-                onDismiss={() => setRegistrationStatus(prev => ({ ...prev, hasError: false }))}
-            />
-
-            {/* Registration Error Dialog - automatically responsive via UI component */}
-            <AlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
-                <AlertDialogContent className="max-w-xs sm:max-w-sm md:max-w-md">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="text-base sm:text-lg md:text-xl">Registration Error</AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm sm:text-base">
-                            Unable to verify registration status. Please refresh the page and try again.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogAction onClick={() => window.location.reload()} className="text-sm sm:text-base">
-                            Refresh Now
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {/* Unified Notification System */}
+            <AnimatePresence>
+                {notification && (
+                    <SystemNotification 
+                        notification={notification}
+                        onDismiss={clearNotification}
+                        onAction={handleRefresh}
+                    />
+                )}
+            </AnimatePresence>
 
             <main>{children}</main>
         </>

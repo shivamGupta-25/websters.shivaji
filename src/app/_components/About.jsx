@@ -88,7 +88,7 @@ const LoadingSkeleton = () => (
 const About = () => {
     const [aboutContent, setAboutContent] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [usingFallback, setUsingFallback] = useState(false);
 
     const { ref, inView } = useInView({
         threshold: 0.1,
@@ -105,11 +105,19 @@ const About = () => {
                 const content = await fetchSiteContent({ signal: controller.signal });
                 clearTimeout(timeoutId);
 
-                const normalizedContent = normalizeContent(content?.about);
-                setAboutContent(normalizedContent);
+                if (content && content.about) {
+                    const normalizedContent = normalizeContent(content.about);
+                    setAboutContent(normalizedContent);
+                    setUsingFallback(false);
+                } else {
+                    // No content or no about section in the content
+                    console.warn('Fallback to local site content for about section');
+                    setUsingFallback(true);
+                    setAboutContent(normalizeContent(siteContent.about));
+                }
             } catch (error) {
                 console.error('Error loading about content:', error);
-                setError(true);
+                setUsingFallback(true);
                 setAboutContent(normalizeContent(siteContent.about));
             } finally {
                 setIsLoading(false);
@@ -163,7 +171,7 @@ const About = () => {
                         />
                     )}
 
-                    {error && (
+                    {usingFallback && (
                         <p className="mt-4 text-xs italic text-gray-500 sm:mt-6 sm:text-sm">
                             Note: Using local site content. Please check your network connection and refresh the page.
                         </p>
