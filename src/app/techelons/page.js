@@ -7,6 +7,7 @@ import ScrollToTopButton from '../_components/ScrollToTopButton';
 import TechelonsMain from '../_components/TechelonsComponents/TechelonsMain';
 import TechelonsSchedule from '../_components/TechelonsComponents/TechelonsSchedule';
 import ComingSoonPage from '../_components/TechelonsComponents/ComingSoonPage';
+import TechelonsSponser from '../_components/TechelonsComponents/TechelonsSponser';
 import { fetchTechelonsData } from '@/lib/utils';
 
 export default function Home() {
@@ -71,6 +72,7 @@ export default function Home() {
         ) : (
           <ComingSoonPage errorMessage="No event data available. Please try again later." />
         )}
+        <TechelonsSponser />
         <ScrollToTopButton visible={showTopButton} onClick={scrollToTop} />
       </main>
       <Footer />
