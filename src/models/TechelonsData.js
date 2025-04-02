@@ -32,6 +32,7 @@ const CoordinatorSchema = new mongoose.Schema({
 const EventSchema = new mongoose.Schema({
     id: String,
     featured: { type: Boolean, default: false },
+    bothDayEvent: { type: Boolean, default: false },
     image: String,
     name: String,
     tagline: String,

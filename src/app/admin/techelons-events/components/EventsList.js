@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp, Filter, Search, Trash2 } from "lucide-react";
-import EventForm from "./EventForm";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import EventFormSection from "./EventFormSection";
 
 export default function EventsList({ 
   techelonsData, 
@@ -189,13 +190,74 @@ export default function EventsList({
                   </div>
                   
                   {isExpanded && (
-                    <div className="p-3 sm:p-4 pt-0 border-t overflow-x-auto">
-                      <EventForm 
-                        event={event}
-                        onChange={(field, value) => handleEventChange(originalIndex, field, value)}
-                        techelonsData={techelonsData}
-                        resetImage={() => resetImageToPlaceholder(originalIndex)}
-                      />
+                    <div className="p-3 sm:p-4 pt-0 border-t">
+                      <Accordion type="multiple" defaultValue={["basic-info"]} className="w-full">
+                        {/* Basic Information */}
+                        <AccordionItem value="basic-info">
+                          <AccordionTrigger className="text-base font-medium">Basic Information</AccordionTrigger>
+                          <AccordionContent>
+                            <EventFormSection 
+                              type="basic-info"
+                              event={event}
+                              onChange={(field, value) => handleEventChange(originalIndex, field, value)}
+                              techelonsData={techelonsData}
+                              resetImage={() => resetImageToPlaceholder(originalIndex)}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+
+                        {/* Event Details */}
+                        <AccordionItem value="event-details">
+                          <AccordionTrigger className="text-base font-medium">Event Details</AccordionTrigger>
+                          <AccordionContent>
+                            <EventFormSection 
+                              type="event-details"
+                              event={event}
+                              onChange={(field, value) => handleEventChange(originalIndex, field, value)}
+                              techelonsData={techelonsData}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+
+                        {/* Prizes & Coordinators */}
+                        <AccordionItem value="prizes-coordinators">
+                          <AccordionTrigger className="text-base font-medium">Prizes & Coordinators</AccordionTrigger>
+                          <AccordionContent>
+                            <EventFormSection 
+                              type="prizes-coordinators"
+                              event={event}
+                              onChange={(field, value) => handleEventChange(originalIndex, field, value)}
+                              techelonsData={techelonsData}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+
+                        {/* Rules & Structure */}
+                        <AccordionItem value="rules-structure">
+                          <AccordionTrigger className="text-base font-medium">Rules & Structure</AccordionTrigger>
+                          <AccordionContent>
+                            <EventFormSection 
+                              type="rules-structure"
+                              event={event}
+                              onChange={(field, value) => handleEventChange(originalIndex, field, value)}
+                              techelonsData={techelonsData}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+
+                        {/* Additional Information */}
+                        <AccordionItem value="additional-info">
+                          <AccordionTrigger className="text-base font-medium">Additional Information</AccordionTrigger>
+                          <AccordionContent>
+                            <EventFormSection 
+                              type="additional-info"
+                              event={event}
+                              onChange={(field, value) => handleEventChange(originalIndex, field, value)}
+                              techelonsData={techelonsData}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
                     </div>
                   )}
                 </Card>

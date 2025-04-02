@@ -144,6 +144,17 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
               {eventData?.description && (
                 <p><strong>Description:</strong> {eventData.description}</p>
               )}
+              <p>
+                <strong>Festival Day:</strong> {eventData?.bothDayEvent 
+                  ? "Day 1 & Day 2" 
+                  : eventData?.festDay === "day1" || eventData?.festDay === "DAY_1" 
+                    ? "Day 1" 
+                    : "Day 2"
+                }
+                {eventData?.bothDayEvent && (
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-purple-500 text-white rounded-full">Both Days</span>
+                )}
+              </p>
               {eventData?.date && (
                 <p><strong>Date:</strong> {eventData.date}</p>
               )}

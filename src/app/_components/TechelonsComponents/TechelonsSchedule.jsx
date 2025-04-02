@@ -56,6 +56,7 @@ const useEventFiltering = (scheduleData) => {
     const [activeFilter, setActiveFilter] = useState("all")
     const [searchTerm, setSearchTerm] = useState("")
     const [featuredOnly, setFeaturedOnly] = useState(false)
+    const [bothDayOnly, setBothDayOnly] = useState(false)
 
     // Initialize activeDay once data is loaded
     useEffect(() => {
@@ -86,6 +87,9 @@ const useEventFiltering = (scheduleData) => {
                 // Filter featured events
                 if (featuredOnly && !event.featured) return false
                 
+                // Filter both day events
+                if (bothDayOnly && !event.bothDayEvent) return false
+                
                 // Filter by category
                 if (activeFilter !== "all" && event.category !== activeFilter) return false
 
@@ -103,12 +107,13 @@ const useEventFiltering = (scheduleData) => {
                 return true
             })
             .sort((a, b) => new Date(`2023-10-27T${a.startTime}`) - new Date(`2023-10-27T${b.startTime}`))
-    }, [activeDay, activeFilter, searchTerm, featuredOnly, scheduleData])
+    }, [activeDay, activeFilter, searchTerm, featuredOnly, bothDayOnly, scheduleData])
 
     const resetFilters = useCallback(() => {
         setActiveFilter("all")
         setSearchTerm("")
         setFeaturedOnly(false)
+        setBothDayOnly(false)
     }, [])
 
     return {
@@ -120,6 +125,8 @@ const useEventFiltering = (scheduleData) => {
         setSearchTerm,
         featuredOnly,
         setFeaturedOnly,
+        bothDayOnly,
+        setBothDayOnly,
         allCategories,
         filteredEvents,
         resetFilters
@@ -161,9 +168,12 @@ const EventCard = memo(({ event, openEventModal, index }) => {
     const imagePath = useMemo(() => getImagePath(event.image), [event.image])
     const categoryStyle = useMemo(() => getCategoryStyle(event.category), [event.category])
     const { formattedDate, dayOfWeek, formattedTime } = useMemo(() => formatEventDateTime(event), [event]);
-    const eventDay = useMemo(() =>
-        event.festDay === "day1" || event.festDay === "DAY_1" ? "Day 1" : "Day 2",
-        [event.festDay])
+    const eventDay = useMemo(() => {
+        if (event.bothDayEvent) {
+            return "Day 1 & Day 2";
+        }
+        return event.festDay === "day1" || event.festDay === "DAY_1" ? "Day 1" : "Day 2";
+    }, [event.bothDayEvent, event.festDay])
 
     // When content is still loading, show the skeleton
     if (!event || Object.keys(event).length === 0) {
@@ -209,6 +219,12 @@ const EventCard = memo(({ event, openEventModal, index }) => {
             {event.featured && (
                 <Badge className="absolute top-0 right-0 z-10 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 rounded-tl-none rounded-br-none font-medium text-xs shadow-md">
                     ⭐ Featured
+                </Badge>
+            )}
+            
+            {event.bothDayEvent && (
+                <Badge className="absolute top-0 left-0 z-10 bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-0 rounded-tr-none rounded-bl-none font-medium text-xs shadow-md">
+                    📅 Both Days
                 </Badge>
             )}
 
@@ -351,7 +367,7 @@ EventCard.displayName = 'EventCard';
  * Filter component for filtering events
  */
 const EventFilter = memo(
-    ({ categories, activeFilter, setActiveFilter, searchTerm, setSearchTerm, featuredOnly, setFeaturedOnly }) => (
+    ({ categories, activeFilter, setActiveFilter, searchTerm, setSearchTerm, featuredOnly, setFeaturedOnly, bothDayOnly, setBothDayOnly }) => (
         <div className="bg-white dark:bg-gray-900 rounded-xl border p-3 mb-4 shadow-sm">
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -374,23 +390,38 @@ const EventFilter = memo(
             </div>
 
             <div className="mt-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                     <h3 className="text-sm font-medium mb-2 flex items-center">
                         <Filter className="h-4 w-4 mr-2 text-primary" />
                         Filter by Category:
                     </h3>
-                    <div className="flex items-center space-x-2">
-                        <Switch 
-                            id="featured-filter"
-                            checked={featuredOnly} 
-                            onCheckedChange={setFeaturedOnly}
-                        />
-                        <label 
-                            htmlFor="featured-filter" 
-                            className="text-xs font-medium text-muted-foreground cursor-pointer whitespace-nowrap"
-                        >
-                            ⭐ Featured Only
-                        </label>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center space-x-2">
+                            <Switch 
+                                id="featured-filter"
+                                checked={featuredOnly} 
+                                onCheckedChange={setFeaturedOnly}
+                            />
+                            <label 
+                                htmlFor="featured-filter" 
+                                className="text-xs font-medium text-muted-foreground cursor-pointer whitespace-nowrap"
+                            >
+                                ⭐ Featured Only
+                            </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Switch 
+                                id="bothday-filter"
+                                checked={bothDayOnly} 
+                                onCheckedChange={setBothDayOnly}
+                            />
+                            <label 
+                                htmlFor="bothday-filter" 
+                                className="text-xs font-medium text-muted-foreground cursor-pointer whitespace-nowrap"
+                            >
+                                📅 Both Day Events
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -511,18 +542,30 @@ const EventSchedule = () => {
         const FEST_DAYS = techelonsData.festDays || {};
         const festInfo = techelonsData.festInfo || {};
 
+        // Get all events
+        const allEvents = techelonsData.events || [];
+        
+        // Find events for each day, including "both day" events on both days
+        const day1Events = allEvents.filter(event => 
+            event.festDay === FEST_DAYS?.DAY_1 || event.bothDayEvent === true
+        );
+        
+        const day2Events = allEvents.filter(event => 
+            event.festDay === FEST_DAYS?.DAY_2 || event.bothDayEvent === true
+        );
+
         return [
             {
                 day: "Day 1",
                 date: festInfo?.dates?.day1,
                 value: FEST_DAYS?.DAY_1,
-                events: techelonsData.events?.filter(event => event.festDay === FEST_DAYS?.DAY_1) || [],
+                events: day1Events,
             },
             {
                 day: "Day 2",
                 date: festInfo?.dates?.day2,
                 value: FEST_DAYS?.DAY_2,
-                events: techelonsData.events?.filter(event => event.festDay === FEST_DAYS?.DAY_2) || [],
+                events: day2Events,
             }
         ];
     }, [techelonsData]);
@@ -537,6 +580,8 @@ const EventSchedule = () => {
         setSearchTerm,
         featuredOnly,
         setFeaturedOnly,
+        bothDayOnly,
+        setBothDayOnly,
         allCategories,
         filteredEvents,
         resetFilters
@@ -607,6 +652,8 @@ const EventSchedule = () => {
                             setSearchTerm={setSearchTerm}
                             featuredOnly={featuredOnly}
                             setFeaturedOnly={setFeaturedOnly}
+                            bothDayOnly={bothDayOnly}
+                            setBothDayOnly={setBothDayOnly}
                         />
                     </div>
 

@@ -31,6 +31,9 @@ const EventContent = memo(({ event, formattedEventDateTime }) => {
 
   // Helper to determine day display
   const getDayDisplay = () => {
+    if (event.bothDayEvent) {
+      return "Day 1 & Day 2";
+    }
     if (!event.festDay) return "";
     return event.festDay === "day1" ? "Day 1" : "Day 2";
   };

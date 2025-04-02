@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import EventForm from "./EventForm";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import toast from "react-hot-toast";
+import EventFormSection from "./EventFormSection";
 
 export default function AddEvent({ 
   newEvent, 
@@ -43,13 +44,78 @@ export default function AddEvent({
         </CardDescription>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
-        <EventForm 
-          event={newEvent}
-          onChange={handleNewEventChange}
-          techelonsData={techelonsData}
-          resetImage={resetNewEventImage}
-          isNewEvent={true}
-        />
+        <Accordion type="multiple" defaultValue={["basic-info"]} className="w-full">
+          {/* Basic Information */}
+          <AccordionItem value="basic-info">
+            <AccordionTrigger className="text-base font-medium">Basic Information</AccordionTrigger>
+            <AccordionContent>
+              <EventFormSection 
+                type="basic-info"
+                event={newEvent}
+                onChange={handleNewEventChange}
+                techelonsData={techelonsData}
+                resetImage={resetNewEventImage}
+                isNewEvent={true}
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Event Details */}
+          <AccordionItem value="event-details">
+            <AccordionTrigger className="text-base font-medium">Event Details</AccordionTrigger>
+            <AccordionContent>
+              <EventFormSection 
+                type="event-details"
+                event={newEvent}
+                onChange={handleNewEventChange}
+                techelonsData={techelonsData}
+                isNewEvent={true}
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Prizes & Coordinators */}
+          <AccordionItem value="prizes-coordinators">
+            <AccordionTrigger className="text-base font-medium">Prizes & Coordinators</AccordionTrigger>
+            <AccordionContent>
+              <EventFormSection 
+                type="prizes-coordinators"
+                event={newEvent}
+                onChange={handleNewEventChange}
+                techelonsData={techelonsData}
+                isNewEvent={true}
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Rules & Structure */}
+          <AccordionItem value="rules-structure">
+            <AccordionTrigger className="text-base font-medium">Rules & Structure</AccordionTrigger>
+            <AccordionContent>
+              <EventFormSection 
+                type="rules-structure"
+                event={newEvent}
+                onChange={handleNewEventChange}
+                techelonsData={techelonsData}
+                isNewEvent={true}
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Additional Information */}
+          <AccordionItem value="additional-info">
+            <AccordionTrigger className="text-base font-medium">Additional Information</AccordionTrigger>
+            <AccordionContent>
+              <EventFormSection 
+                type="additional-info"
+                event={newEvent}
+                onChange={handleNewEventChange}
+                techelonsData={techelonsData}
+                isNewEvent={true}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
         
         <div className="mt-6">
           <Button onClick={handleAddEvent} className="w-full sm:w-auto">

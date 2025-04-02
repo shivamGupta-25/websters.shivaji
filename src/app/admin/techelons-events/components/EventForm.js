@@ -85,6 +85,22 @@ export default function EventForm({
           </div>
         </div>
         
+        <div className="space-y-2 flex items-end">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="event-both-day" 
+              checked={event.bothDayEvent || false}
+              onCheckedChange={(checked) => onChange("bothDayEvent", checked)} 
+            />
+            <Label 
+              htmlFor="event-both-day" 
+              className="text-sm cursor-pointer"
+            >
+              Both Day Event <span className="text-xs text-muted-foreground">(will display on both days)</span>
+            </Label>
+          </div>
+        </div>
+        
         <div className="space-y-2">
           <Label htmlFor="event-short-desc" className="text-sm">Short Description</Label>
           <Input

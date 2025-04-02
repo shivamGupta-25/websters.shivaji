@@ -69,6 +69,8 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
     venue: event.venue || 'TBA',
     tagline: event.tagline || '',
     category: event.category || '',
+    bothDayEvent: event.bothDayEvent || false,
+    festDay: event.festDay || '',
     instructions: event.instructions || '',
     rules: Array.isArray(event.rules) ? event.rules : [],
     competitionStructure: Array.isArray(event.competitionStructure) ? event.competitionStructure : [],
@@ -76,6 +78,10 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
     whatsappGroup: whatsappGroupLink,
     coordinators: Array.isArray(event.coordinators) ? event.coordinators : []
   };
+
+  // Get day display for email
+  const dayDisplay = eventDetails.bothDayEvent ? 'Day 1 & Day 2' : 
+    (eventDetails.festDay === 'day1' || eventDetails.festDay === 'DAY_1') ? 'Day 1' : 'Day 2';
 
   // Create team-specific content based on event type and recipient
   const teamContent = generateTeamContent(registration, isTeamMember);
@@ -142,7 +148,7 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
         }
         .whatsapp {
           background-color: #25D366;
-          color: white;
+          color: white !important;
         }
         h2 {
           color: #4f46e5;
@@ -155,6 +161,15 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
           padding: 10px;
           background-color: #f0f0f0;
           border-radius: 5px;
+        }
+        .badge {
+          display: inline-block;
+          padding: 3px 8px;
+          background-color: #8b5cf6;
+          color: white;
+          border-radius: 12px;
+          font-size: 12px;
+          margin-left: 8px;
         }
       </style>
     </head>
@@ -174,6 +189,7 @@ export async function sendTechelonsRegistrationEmail(registration, event, isTeam
           <ul>
             <li><strong>Event:</strong> ${eventDetails.name}</li>
             ${eventDetails.tagline ? `<li><strong>Tagline:</strong> <em>${eventDetails.tagline}</em></li>` : ''}
+            <li><strong>Festival Day:</strong> ${dayDisplay} ${eventDetails.bothDayEvent ? '<span class="badge">Both Days</span>' : ''}</li>
             <li><strong>Date:</strong> ${eventDetails.date}</li>
             <li><strong>Time:</strong> ${eventDetails.time}</li>
             <li><strong>Venue:</strong> ${eventDetails.venue}</li>
