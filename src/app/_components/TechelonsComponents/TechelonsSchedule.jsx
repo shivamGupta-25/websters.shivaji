@@ -496,11 +496,12 @@ const EventSchedule = () => {
             }
         };
 
-        fetchData();
+        // Simulate loading delay (remove in production and use actual data loading)
+        const timer = setTimeout(() => {
+            fetchData();
+        }, 2000);
 
-        // Simple loading timeout for better UX
-        const loadingTimer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(loadingTimer);
+        return () => clearTimeout(timer);
     }, []);
 
     // Memoize schedule data
