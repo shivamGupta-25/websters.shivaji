@@ -8,8 +8,10 @@ export function cn(...inputs) {
 // Cache for site content
 let siteContentCache = null;
 let techelonsDataCache = null;
+let sponsorsDataCache = null;
 let siteContentCacheTimestamp = null;
 let techelonsDataCacheTimestamp = null;
+let sponsorsDataCacheTimestamp = null;
 const CACHE_DURATION = 5 * 60 * 1000; // Increased to 5 minutes in milliseconds
 
 // Function to fetch site content with improved caching
@@ -194,6 +196,102 @@ export async function fetchTechelonsData() {
         if (techelonsDataCache) {
             console.warn('Returning expired cached Techelons data due to fetch error');
             return techelonsDataCache;
+        }
+
+        return null;
+    }
+}
+
+// Function to fetch Sponsors data with improved error handling and caching
+export async function fetchSponsorsData() {
+    // Check if cache is valid
+    const now = Date.now();
+    const isCacheValid = sponsorsDataCache && sponsorsDataCacheTimestamp && (now - sponsorsDataCacheTimestamp < CACHE_DURATION);
+
+    if (isCacheValid) {
+        return sponsorsDataCache;
+    }
+
+    try {
+        // Determine if we're in a browser or server environment
+        const isServer = typeof window === 'undefined';
+
+        if (isServer) {
+            // In server environment, connect directly to the database
+            const { default: connectToDatabase } = await import('@/lib/mongodb');
+            const { default: SponsorsData } = await import('@/models/SponsorsData');
+
+            await connectToDatabase();
+            const data = await SponsorsData.findOne({});
+
+            if (!data) {
+                console.warn('No Sponsors data found in database');
+                return null;
+            }
+
+            sponsorsDataCache = data;
+            sponsorsDataCacheTimestamp = now;
+            return data;
+        } else {
+            // In browser environment, use relative URL with timeout and cache-busting
+            // Use AbortController to properly cancel the fetch request on timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+            }, 5000);
+
+            try {
+                // Create the fetch promise with abort signal and cache-busting parameter
+                const cacheBuster = Date.now();
+                const response = await fetch(`/api/sponsors?_=${cacheBuster}`, {
+                    signal: controller.signal,
+                    // Add cache control headers
+                    headers: {
+                        'Cache-Control': 'max-age=300' // 5 minutes
+                    }
+                });
+
+                // Clear the timeout since fetch completed
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch Sponsors data: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Update cache
+                sponsorsDataCache = data;
+                sponsorsDataCacheTimestamp = now;
+
+                return data;
+            } catch (error) {
+                // Clear the timeout if there was an error
+                clearTimeout(timeoutId);
+
+                // Handle abort error specifically
+                if (error.name === 'AbortError') {
+                    console.warn('Request timed out after 5 seconds. Attempting to use cached data.');
+                    // If we have cached data, return it even if it's expired
+                    if (sponsorsDataCache) {
+                        console.warn('Returning cached Sponsors data due to timeout');
+                        return sponsorsDataCache;
+                    }
+                    // Only throw if we have no cached data
+                    throw new Error('Request timed out after 5 seconds. Please check your network connection and try again.');
+                }
+
+                // Re-throw other errors to be caught by the outer try-catch
+                throw error;
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching Sponsors data:', error);
+
+        // If we have cached data, return it even if it's expired
+        if (sponsorsDataCache) {
+            console.warn('Returning expired cached Sponsors data due to fetch error');
+            return sponsorsDataCache;
         }
 
         return null;
