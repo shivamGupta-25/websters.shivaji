@@ -30,7 +30,7 @@ const NAV_LINKS = [
     { name: 'Workshop', href: '/#workshop' },
     { name: 'Past Event', href: '/#pastevent' },
     { name: 'Council', href: '/#council' },
-    { name: 'Techelons - 25', href: '/techelons' },
+    { name: 'Techelons', href: '/techelons' },
 ];
 
 // CSS classes using Tailwind composition

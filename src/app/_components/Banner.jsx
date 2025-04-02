@@ -42,7 +42,7 @@ const animations = {
 };
 
 const BannerSkeleton = () => (
-    <section className="container px-8 mx-auto min-h-[calc(100vh-10rem)] flex flex-col justify-center my-4 mb-12">
+    <section className="container px-8 mx-auto flex flex-col justify-center my-4 mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="flex flex-col items-center text-center w-full md:pl-10">
                 <Skeleton className="text-6xl md:text-8xl lg:text-9xl font-bold h-14 md:h-20 lg:h-24 w-3/4 mb-2" />
@@ -125,7 +125,7 @@ const Banner = () => {
     };
 
     return (
-        <section ref={ref} className="container px-8 mx-auto min-h-[calc(100vh-10rem)] flex flex-col justify-center my-4 mb-12">
+        <section ref={ref} className="container px-8 mx-auto flex flex-col justify-center my-4 mb-12">
             {usingFallback && (
                 <div className="text-amber-600 text-sm mb-2 text-center">
                     Using local fallback content due to connection issues. Please refresh to try again.
