@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, FileText, Calendar, Award } from "lucide-react";
+import { ArrowRight, FileText, Calendar, Award, DollarSign } from "lucide-react";
 
 export default function AdminDashboard() {
     // Management cards configuration
@@ -35,6 +35,15 @@ export default function AdminDashboard() {
             buttonColor: "bg-amber-600 hover:bg-amber-700",
             details: "Update Techelons fest information, manage events, registration settings, and other details for the tech fest.",
             link: "/admin/techelons-events",
+        },
+        {
+            title: "Sponsors Management",
+            description: "Manage event sponsors and partnerships",
+            icon: <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />,
+            iconBg: "bg-green-100",
+            buttonColor: "bg-green-600 hover:bg-green-700",
+            details: "Add, edit, or remove event sponsors. Update sponsor logos, website links, and display information.",
+            link: "/admin/sponsors",
         }
     ];
 
