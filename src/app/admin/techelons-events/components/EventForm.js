@@ -155,7 +155,17 @@ export default function EventForm({
           <Label htmlFor="event-fest-day" className="text-sm">Fest Day*</Label>
           <Select
             value={event.festDay}
-            onValueChange={(value) => onChange("festDay", value)}
+            onValueChange={(value) => {
+              // Update the festDay
+              onChange("festDay", value);
+              
+              // Auto-fill date based on selected fest day
+              if (value === techelonsData.festDays.DAY_1 && techelonsData.festInfo.dates.day1) {
+                onChange("date", techelonsData.festInfo.dates.day1);
+              } else if (value === techelonsData.festDays.DAY_2 && techelonsData.festInfo.dates.day2) {
+                onChange("date", techelonsData.festInfo.dates.day2);
+              }
+            }}
           >
             <SelectTrigger id="event-fest-day" className="w-full">
               <SelectValue placeholder="Select day" />
@@ -176,9 +186,25 @@ export default function EventForm({
             id="event-date"
             value={event.date}
             onChange={(e) => onChange("date", e.target.value)}
-            placeholder="April 10, 2025"
-            className="w-full"
+            placeholder={
+              event.festDay === techelonsData.festDays.DAY_1 ? 
+                "Auto-filled from Day 1 date" : 
+              event.festDay === techelonsData.festDays.DAY_2 ? 
+                "Auto-filled from Day 2 date" : 
+                "April 10, 2025"
+            }
+            className={`w-full ${
+              (event.festDay === techelonsData.festDays.DAY_1 && techelonsData.festInfo.dates.day1) || 
+              (event.festDay === techelonsData.festDays.DAY_2 && techelonsData.festInfo.dates.day2) 
+                ? "bg-muted border-dashed" 
+                : ""
+            }`}
           />
+          {(event.festDay === techelonsData.festDays.DAY_1 || event.festDay === techelonsData.festDays.DAY_2) && (
+            <span className="text-xs text-muted-foreground">
+              Auto-filled based on selected Fest Day. You can still edit if needed.
+            </span>
+          )}
         </div>
         
         <div className="space-y-2">
