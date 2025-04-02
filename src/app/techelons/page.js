@@ -13,6 +13,7 @@ export default function Home() {
   const [showTopButton, setShowTopButton] = useState(false);
   const [techelonsData, setTechelonsData] = useState(null);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadTechelonsData = async () => {
@@ -23,6 +24,8 @@ export default function Home() {
       } catch (error) {
         console.error('Error loading techelons data:', error);
         setError(true);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -53,11 +56,20 @@ export default function Home() {
     <>
       <Header />
       <main>
-        <TechelonsMain />
+        <TechelonsMain 
+          loading={loading} 
+          error={error} 
+          techelonsData={techelonsData} 
+        />
+        
         {error ? (
           <ComingSoonPage errorMessage="Unable to load event data. Please click the refresh button below to try again." />
-        ) : techelonsData && (
+        ) : loading ? (
+          null // Don't render schedule component while loading
+        ) : techelonsData ? (
           showComingSoon ? <ComingSoonPage /> : <TechelonsSchedule />
+        ) : (
+          <ComingSoonPage errorMessage="No event data available. Please try again later." />
         )}
         <ScrollToTopButton visible={showTopButton} onClick={scrollToTop} />
       </main>

@@ -55,38 +55,19 @@ const FeatureCard = memo(({ icon, title, description }) => (
 
 FeatureCard.displayName = 'FeatureCard';
 
-// Message component for notifications
-const StatusMessage = memo(({ message, type = "info" }) => {
-    const typeStyles = {
-        info: "bg-blue-50 border-blue-200 text-blue-600",
-        warning: "bg-amber-50 border-amber-200 text-amber-600",
-        error: "bg-red-50 border-red-200 text-red-600",
-        success: "bg-green-50 border-green-200 text-green-600"
-    };
-
-    return message ? (
-        <div className={`text-sm mb-2 text-center px-4 py-2 rounded-lg border ${typeStyles[type]}`}>
-            {message}
-        </div>
-    ) : null;
-});
-
-StatusMessage.displayName = 'StatusMessage';
-
 const TechelonsMain = () => {
     const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [registrationStatus, setRegistrationStatus] = useState({
         registrationOpen: false,
-        statusMessage: "Loading...",
+        statusMessage: "Registration Status Unavailable",
         daysLeft: null
     });
     const [is3DLoaded, setIs3DLoaded] = useState(false);
-    const [is3DStarted, setIs3DStarted] = useState(false);
     const [shouldRender3D, setShouldRender3D] = useState(false);
     const [contentLoaded, setContentLoaded] = useState(false);
     const [techelonsContent, setTechelonsContent] = useState(DEFAULT_CONTENT);
-    const [hasError, setHasError] = useState(false);
+    const [usingFallback, setUsingFallback] = useState(false);
 
     // Handle responsive design
     useEffect(() => {
@@ -111,6 +92,9 @@ const TechelonsMain = () => {
                 // Update content if available
                 if (data?.uiContent) {
                     setTechelonsContent(data.uiContent);
+                } else {
+                    console.info('Using fallback Techelons UI content');
+                    setUsingFallback(true);
                 }
 
                 // Update registration status if available
@@ -145,10 +129,13 @@ const TechelonsMain = () => {
                         statusMessage,
                         daysLeft
                     });
+                } else {
+                    console.info('Using fallback Techelons registration status');
+                    setUsingFallback(true);
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
-                setHasError(true);
+                setUsingFallback(true);
                 setRegistrationStatus({
                     registrationOpen: false,
                     statusMessage: "Registration Status Unavailable",
@@ -191,18 +178,7 @@ const TechelonsMain = () => {
         return () => observer.disconnect();
     }, [isMobile]);
 
-    // Effect to force set the 3D loaded state after a timeout if it hasn't been set
-    useEffect(() => {
-        let timer;
-        if (shouldRender3D && is3DStarted && !is3DLoaded) {
-            timer = setTimeout(() => {
-                setIs3DLoaded(true);
-            }, 5000); // Force mark as loaded after 5 seconds
-        }
-        return () => clearTimeout(timer);
-    }, [shouldRender3D, is3DStarted, is3DLoaded]);
-
-    // Check if Spline canvas is in the DOM as another way to detect loading
+    // Check if Spline canvas is in the DOM to detect loading
     useEffect(() => {
         if (shouldRender3D && !is3DLoaded) {
             const checkSplineLoaded = setInterval(() => {
@@ -229,17 +205,9 @@ const TechelonsMain = () => {
 
     const handleLearnMore = useCallback(() => {
         if (typeof window !== 'undefined') {
-            // Get the target element and smooth scroll to it
-            document.getElementById('events').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' });
         }
     }, []);
-
-    // Mark that 3D has started loading
-    useEffect(() => {
-        if (shouldRender3D) {
-            setIs3DStarted(true);
-        }
-    }, [shouldRender3D]);
 
     // Status badge styling
     const statusBadgeStyle = useMemo(() => {
@@ -271,11 +239,10 @@ const TechelonsMain = () => {
     return (
         <section className="relative py-6 sm:py-8 md:py-10 overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-                {hasError && (
-                    <StatusMessage 
-                        message="Using local content due to connection issues. Please refresh to try again." 
-                        type="warning" 
-                    />
+                {usingFallback && (
+                    <div className="text-amber-600 text-sm mb-4 text-center">
+                        Using local fallback content due to connection issues. Please refresh to try again.
+                    </div>
                 )}
                 
                 {/* Status Badge */}
