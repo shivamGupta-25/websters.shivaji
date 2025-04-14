@@ -131,6 +131,67 @@ const Banner = () => {
                     Using local fallback content due to connection issues. Please refresh to try again.
                 </div>
             )}
+            <div className="text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3 sm:p-4 mx-auto max-w-3xl my-2 sm:my-4 shadow-sm">
+                <div className="flex flex-col items-center space-y-2">
+                    <div className="flex items-center space-x-2 text-center">
+                        <span className="text-amber-500 text-lg sm:text-xl">⚠️</span>
+                        <h2 className="font-semibold text-base sm:text-lg md:text-xl">This is not the official Websters website</h2>
+                    </div>
+
+                    <p className="text-xs sm:text-sm md:text-base text-center px-2">
+                        This is a development testing site of the official Websters website.
+                    </p>
+
+                    <p className="text-xs sm:text-sm md:text-base text-center px-2">
+                        Please visit the official Websters website <br/> at{" "}
+                        <a
+                            href="https://websters-shivaji.vercel.app"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline font-medium transition-colors duration-200"
+                        >
+                            websters-shivaji.vercel.app
+                        </a>
+                    </p>
+
+                    <div className="text-xs sm:text-sm md:text-base text-center mt-1 sm:mt-2 px-2">
+                        <p className="mb-1">
+                            Both this testing site and the official website are made with{" "}
+                            <span className="text-red-500">❤️</span>
+                            {" "}by
+                        </p>
+                        <div className="flex flex-wrap justify-center items-center gap-1">
+                            <span className="font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded inline-flex items-center text-xs sm:text-sm">
+                                Shivam Raj Gupta
+                                <a
+                                    href="https://www.linkedin.com/in/shivam-raj-gupta/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-amber-700 hover:text-amber-900 ml-1 sm:ml-2"
+                                    aria-label="LinkedIn Profile"
+                                >
+                                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3v9zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
+                                    </svg>
+                                </a>
+                                <a
+                                    href="mailto:guptashivam25oct@gmail.com"
+                                    className="text-amber-700 hover:text-amber-900 ml-1 sm:ml-2"
+                                    aria-label="Email"
+                                >
+                                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                    </svg>
+                                </a>
+                            </span>
+                        </div>
+                        <p className="mt-1">
+                            for Websters - The Computer Science Society, Shivaji College, University of Delhi.
+                        </p>
+                    </div>
+                </div>
+            </div>
             <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
                 initial="hidden"
