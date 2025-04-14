@@ -143,14 +143,3 @@ This website is PWA-ready, allowing users to install it on their devices for a n
 Project developed by:
 
 - **Shivam Raj Gupta** - Technical Head - [LinkedIn](https://www.linkedin.com/in/shivam-raj-gupta/) - [guptashivam25oct@gmail.com](mailto:guptashivam25oct@gmail.com)
-
-
-## 📝 License
-
-This project is maintained by Websters, the Computer Science Society of Shivaji College, University of Delhi.
-
-## 📞 Contact
-
-- **Instagram**: [@websters.shivaji](https://www.instagram.com/websters.shivaji/)
-- **LinkedIn**: [Websters - Shivaji College](https://www.linkedin.com/company/websters-shivaji-college/)
-- **Email**: websters@shivaji.du.ac.in
