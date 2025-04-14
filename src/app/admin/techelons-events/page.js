@@ -71,7 +71,11 @@ export default function TechelonsManagement() {
     instructions: "",
     resources: "",
     whatsappGroup: "",
-    competitionStructure: [""],
+    competitionStructure: [{ 
+      title: "Round 1", 
+      description: "", 
+      tasks: [""] 
+    }],
     evaluationCriteria: [""]
   });
 
@@ -232,7 +236,11 @@ export default function TechelonsManagement() {
       instructions: "",
       resources: "",
       whatsappGroup: "",
-      competitionStructure: [""],
+      competitionStructure: [{ 
+        title: "Round 1", 
+        description: "", 
+        tasks: [""] 
+      }],
       evaluationCriteria: [""]
     });
 

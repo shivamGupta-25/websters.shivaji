@@ -44,7 +44,7 @@ const participantSchema = z.object({
 const createFormSchema = (isTeamEvent, minTeamSize, maxTeamSize) => {
   const baseSchema = {
     mainParticipant: participantSchema,
-    collegeIdUrl: z.string().min(1, "College ID is required"),
+    collegeIdUrl: z.string().optional(),
     query: z.string().optional(),
   };
   
@@ -527,7 +527,7 @@ export default function RegistrationForm({
         {/* College ID upload */}
         <div>
           <label className="block text-xs sm:text-sm font-medium mb-1">
-            {isTeamEvent ? "College ID (Compile and upload all team members' IDs)" : "College ID"} <span className="text-red-500">*</span>
+            {isTeamEvent ? "College ID (Main participant upload the ID)" : "College ID"} (Optional)
           </label>
           <FileUpload
             setValue={setValue}

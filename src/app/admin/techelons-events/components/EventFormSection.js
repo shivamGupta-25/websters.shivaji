@@ -515,7 +515,11 @@ export default function EventFormSection({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => addArrayItem("competitionStructure", "")}
+              onClick={() => addArrayItem("competitionStructure", { 
+                title: `Round ${event.competitionStructure ? event.competitionStructure.length + 1 : 1}`,
+                description: "", 
+                tasks: [""]
+              })}
               className="h-8 px-2"
             >
               <PlusCircle className="h-3.5 w-3.5 mr-1" />
@@ -523,28 +527,100 @@ export default function EventFormSection({
             </Button>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-4">
             {event.competitionStructure?.map((round, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <div className="flex-1">
-                  <Input
-                    value={round}
-                    onChange={(e) => handleArrayFieldChange("competitionStructure", index, e.target.value)}
-                    placeholder={`Round ${index + 1}`}
-                    className="w-full"
-                  />
+              <div key={index} className="space-y-3 p-3 border rounded-md bg-muted/20">
+                <div className="flex justify-between items-center">
+                  <Label className="text-xs font-medium">Round #{index + 1}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeArrayItem("competitionStructure", index)}
+                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 h-7 w-7"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="sr-only">Remove round</span>
+                  </Button>
                 </div>
                 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeArrayItem("competitionStructure", index)}
-                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 h-8 w-8"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Remove round</span>
-                </Button>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor={`round-title-${index}`} className="text-xs">Round Title</Label>
+                    <Input
+                      id={`round-title-${index}`}
+                      value={round.title || ''}
+                      onChange={(e) => handleArrayFieldChange("competitionStructure", index, e.target.value, "title")}
+                      placeholder="e.g., Round 1 (16 Teams → 8 Teams)"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor={`round-description-${index}`} className="text-xs">Description (Optional)</Label>
+                    <Input
+                      id={`round-description-${index}`}
+                      value={round.description || ''}
+                      onChange={(e) => handleArrayFieldChange("competitionStructure", index, e.target.value, "description")}
+                      placeholder="Brief description of this round"
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-medium">Tasks</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const updatedRound = { ...round };
+                          updatedRound.tasks = [...(updatedRound.tasks || []), ""];
+                          handleArrayFieldChange("competitionStructure", index, updatedRound);
+                        }}
+                        className="h-7 px-2 text-xs"
+                      >
+                        <PlusCircle className="h-3 w-3 mr-1" />
+                        Add Task
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2 pl-2">
+                      {round.tasks?.map((task, taskIndex) => (
+                        <div key={taskIndex} className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <Input
+                              value={task}
+                              onChange={(e) => {
+                                const updatedRound = { ...round };
+                                updatedRound.tasks[taskIndex] = e.target.value;
+                                handleArrayFieldChange("competitionStructure", index, updatedRound);
+                              }}
+                              placeholder={`Task #${taskIndex + 1}`}
+                              className="w-full"
+                            />
+                          </div>
+                          
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              const updatedRound = { ...round };
+                              updatedRound.tasks = updatedRound.tasks.filter((_, i) => i !== taskIndex);
+                              handleArrayFieldChange("competitionStructure", index, updatedRound);
+                            }}
+                            className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 h-8 w-8"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove task</span>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

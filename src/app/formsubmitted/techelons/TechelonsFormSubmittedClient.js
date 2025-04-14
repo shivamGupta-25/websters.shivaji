@@ -33,6 +33,7 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
   const [registrationData, setRegistrationData] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [defaultWhatsappGroup, setDefaultWhatsappGroup] = useState(null);
+  const [festDates, setFestDates] = useState({ day1: null, day2: null });
 
   useEffect(() => {
     const fetchRegistrationData = async () => {
@@ -90,6 +91,22 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
             }
           } catch (defaultError) {
             console.error("Error fetching default WhatsApp group:", defaultError);
+          }
+        }
+        
+        // Fetch festival dates if it's a both day event
+        if (data.event?.bothDayEvent) {
+          try {
+            const festInfoResponse = await fetch('/api/techelons/festival-info');
+            if (festInfoResponse.ok) {
+              const festInfoData = await festInfoResponse.json();
+              setFestDates({
+                day1: festInfoData?.festInfo?.dates?.day1 || null,
+                day2: festInfoData?.festInfo?.dates?.day2 || null
+              });
+            }
+          } catch (festInfoError) {
+            console.error("Error fetching festival info:", festInfoError);
           }
         }
       } catch (error) {
@@ -155,8 +172,14 @@ export default function TechelonsFormSubmittedClient({ token, alreadyRegistered,
                   <span className="ml-2 px-2 py-0.5 text-xs bg-purple-500 text-white rounded-full">Both Days</span>
                 )}
               </p>
-              {eventData?.date && (
+              {!eventData?.bothDayEvent && eventData?.date && (
                 <p><strong>Date:</strong> {eventData.date}</p>
+              )}
+              {eventData?.bothDayEvent && (
+                <div className="mt-1 ml-4">
+                  <p><strong>Day 1:</strong> {festDates.day1 || "TBA"}</p>
+                  <p><strong>Day 2:</strong> {festDates.day2 || "TBA"}</p>
+                </div>
               )}
               {eventData?.time && (
                 <p><strong>Time:</strong> {eventData.time}</p>

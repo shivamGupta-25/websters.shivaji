@@ -73,7 +73,7 @@ const Footer = () => {
     // Fetch developer info with error handling and cleanup
     const fetchDeveloperInfo = useCallback(() => {
         const controller = new AbortController();
-        
+
         (async () => {
             try {
                 const response = await fetch("https://credit-api.vercel.app/api/credits", {

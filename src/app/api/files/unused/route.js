@@ -5,13 +5,14 @@ import SiteContent from '@/models/SiteContent';
 import TechelonsData from '@/models/TechelonsData';
 import TechelonsRegistration from '@/models/TechelonsRegistration';
 import WorkshopRegistration from '@/models/WorkshopRegistration';
+import SponsorsData from '@/models/SponsorsData';
 import mongoose from 'mongoose';
 
 // Fields likely to contain file references
 const FILE_REFERENCE_FIELDS = [
   'fileId', 'file', 'documentId', 'imageId', 'image', 'photo',
   'attachment', 'logo', 'logoImage', 'bannerImage', 'document',
-  'collegeId', 'idProof', 'profilePicture', 'avatar'
+  'collegeId', 'idProof', 'profilePicture', 'avatar', 'img'
 ];
 
 /**
@@ -147,9 +148,10 @@ export async function GET(request) {
     });
 
     // Get content data where files might be referenced
-    const [siteContent, techelonsData, techelonsRegistrations, workshopRegistrations] = await Promise.all([
+    const [siteContent, techelonsData, sponsorsData, techelonsRegistrations, workshopRegistrations] = await Promise.all([
       SiteContent.findOne().lean(),
       TechelonsData.findOne().lean(),
+      SponsorsData.findOne().lean(),
       TechelonsRegistration.find().lean(),
       WorkshopRegistration.find().lean()
     ]);
@@ -157,6 +159,7 @@ export async function GET(request) {
     // Check models for file references
     checkFieldsForFileIds(siteContent, fileUsageMap);
     checkFieldsForFileIds(techelonsData, fileUsageMap);
+    checkFieldsForFileIds(sponsorsData, fileUsageMap);
 
     // Check registrations
     techelonsRegistrations.forEach(registration => {
@@ -171,6 +174,7 @@ export async function GET(request) {
     const contentSources = [
       siteContent,
       techelonsData,
+      sponsorsData,
       ...techelonsRegistrations,
       ...workshopRegistrations
     ];

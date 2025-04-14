@@ -117,6 +117,7 @@ const EventModal = memo(({ event, isOpen, onClose }) => {
               <EventContent
                 event={event}
                 formattedEventDateTime={formattedEventDateTime}
+                registrationStatus={registrationStatus}
               />
 
               {/* Action buttons */}

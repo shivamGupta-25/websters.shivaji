@@ -26,6 +26,31 @@ export async function POST(request) {
     const body = await request.json();
     await connectToDatabase();
 
+    // Transform any string-based competitionStructure to object format
+    if (body.events && Array.isArray(body.events)) {
+      body.events = body.events.map(event => {
+        // If competitionStructure exists and is an array of strings, convert to object format
+        if (event.competitionStructure && Array.isArray(event.competitionStructure)) {
+          const isOldFormat = event.competitionStructure.length > 0 && 
+                              typeof event.competitionStructure[0] === 'string';
+          
+          if (isOldFormat) {
+            // Convert to new format
+            event.competitionStructure = event.competitionStructure.map((item, index) => ({
+              title: `Round ${index + 1}`,
+              description: "",
+              tasks: [item]
+            }));
+          }
+        } else if (!event.competitionStructure) {
+          // Initialize with empty array if doesn't exist
+          event.competitionStructure = [];
+        }
+        
+        return event;
+      });
+    }
+
     const techelonsData = await TechelonsData.findOne({});
     let result;
 

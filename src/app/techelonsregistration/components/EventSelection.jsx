@@ -146,6 +146,26 @@ export default function EventSelection({ events, onSelectEvent, categories }) {
 
 function EventCard({ event, onSelect, categories }) {
   const isRegistrationOpen = event.registrationStatus === "open";
+  const [festDates, setFestDates] = useState({ day1: null, day2: null });
+  
+  // Load fest dates for both day events
+  useEffect(() => {
+    const loadFestDates = async () => {
+      if (event.bothDayEvent) {
+        try {
+          const data = await fetch('/api/techelons/festival-info').then(res => res.json());
+          setFestDates({
+            day1: data?.festInfo?.dates?.day1 || null,
+            day2: data?.festInfo?.dates?.day2 || null
+          });
+        } catch (error) {
+          console.error("Error loading fest dates:", error);
+        }
+      }
+    };
+    
+    loadFestDates();
+  }, [event.bothDayEvent]);
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col h-full">
@@ -157,6 +177,12 @@ function EventCard({ event, onSelect, categories }) {
               <Badge variant="secondary" className="flex items-center gap-1 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100">
                 <Star className="h-3 w-3" />
                 <span className="text-xs">Featured</span>
+              </Badge>
+            )}
+            {event.bothDayEvent && (
+              <Badge variant="secondary" className="flex items-center gap-1 bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-100">
+                <CalendarIcon className="h-3 w-3" />
+                <span className="text-xs">Both Days</span>
               </Badge>
             )}
           </div>
@@ -173,10 +199,25 @@ function EventCard({ event, onSelect, categories }) {
 
       <CardContent className="pb-1 flex-grow">
         <div className="space-y-1 text-xs md:text-sm">
-          {event.date && (
+          {!event.bothDayEvent && event.date && (
             <div className="flex items-center text-gray-600 dark:text-gray-400">
               <CalendarIcon className="h-3 w-3 mr-1 flex-shrink-0 md:h-4 md:w-4 md:mr-2" />
               <span className="truncate">{event.date}</span>
+            </div>
+          )}
+          
+          {event.bothDayEvent && (
+            <div className="flex flex-col space-y-1 text-gray-600 dark:text-gray-400">
+              <div className="flex items-center">
+                <CalendarIcon className="h-3 w-3 mr-1 flex-shrink-0 md:h-4 md:w-4 md:mr-2" />
+                <span className="font-medium">Day 1:</span>
+                <span className="ml-1 truncate">{festDates.day1 || "TBA"}</span>
+              </div>
+              <div className="flex items-center">
+                <CalendarIcon className="h-3 w-3 mr-1 flex-shrink-0 md:h-4 md:w-4 md:mr-2 opacity-0" />
+                <span className="font-medium">Day 2:</span>
+                <span className="ml-1 truncate">{festDates.day2 || "TBA"}</span>
+              </div>
             </div>
           )}
 

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Menu, X, Home, FileText, Users, LogOut, DollarSign } from "lucide-react";
+import { Menu, X, Home, FileText, Users, LogOut, DollarSign, QrCode } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -58,6 +58,7 @@ export default function AdminLayout({ children }) {
         { name: "Workshop", href: "/admin/workshop", icon: Users },
         { name: "Techelons Events", href: "/admin/techelons-events", icon: Users },
         { name: "Techelons Registrations", href: "/admin/techelons-registrations", icon: Users },
+        { name: "QR Code", href: "/admin/qr-code", icon: QrCode },
         { name: "Sponsors", href: "/admin/sponsors", icon: DollarSign },
         { name: "Unused Files", href: "/admin/unused-files", icon: FileText },
         { name: "Footer", href: "/admin/footer", icon: FileText },

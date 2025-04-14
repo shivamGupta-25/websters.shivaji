@@ -70,7 +70,7 @@ export default function Home() {
         ) : techelonsData ? (
           showComingSoon ? <ComingSoonPage /> : <TechelonsSchedule />
         ) : (
-          <ComingSoonPage errorMessage="No event data available. Please try again later." />
+          <ComingSoonPage errorMessage="Please refresh the page." />
         )}
         <TechelonsSponser />
         <ScrollToTopButton visible={showTopButton} onClick={scrollToTop} />

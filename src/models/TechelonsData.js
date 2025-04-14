@@ -29,6 +29,13 @@ const CoordinatorSchema = new mongoose.Schema({
     phone: String
 }, { _id: false });
 
+// Define structure for competition rounds
+const CompetitionRoundSchema = new mongoose.Schema({
+    title: String,
+    description: String,
+    tasks: [String]
+}, { _id: false });
+
 const EventSchema = new mongoose.Schema({
     id: String,
     featured: { type: Boolean, default: false },
@@ -53,7 +60,7 @@ const EventSchema = new mongoose.Schema({
     instructions: String,
     resources: String,
     whatsappGroup: String,
-    competitionStructure: [String],
+    competitionStructure: [CompetitionRoundSchema],
     evaluationCriteria: [String]
 }, { _id: false });
 

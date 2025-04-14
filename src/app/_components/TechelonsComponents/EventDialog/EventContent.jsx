@@ -1,6 +1,6 @@
 // NOTE: This file was automatically updated to use fetchTechelonsData instead of importing from techelonsData directly.
 // Please review and update the component to use the async fetchTechelonsData function.
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import {
   BookOpen,
   Calendar,
@@ -20,8 +20,28 @@ import { SectionHeading, InfoCard, RegistrationStatus } from "./UIComponents";
 import { fetchTechelonsData } from '@/lib/utils';
 
 // Main consolidated component to reduce importing overhead
-const EventContent = memo(({ event, formattedEventDateTime }) => {
+const EventContent = memo(({ event, formattedEventDateTime, registrationStatus }) => {
   if (!event) return null;
+  
+  const [festDates, setFestDates] = useState({ day1: null, day2: null });
+
+  useEffect(() => {
+    const loadFestDates = async () => {
+      try {
+        const data = await fetchTechelonsData();
+        setFestDates({
+          day1: data?.festInfo?.dates?.day1 || null,
+          day2: data?.festInfo?.dates?.day2 || null
+        });
+      } catch (error) {
+        console.error("Error loading fest dates:", error);
+      }
+    };
+    
+    if (event.bothDayEvent) {
+      loadFestDates();
+    }
+  }, [event.bothDayEvent]);
 
   const { formattedDate, formattedTime, dayOfWeek } = formattedEventDateTime || {
     formattedDate: null,
@@ -40,7 +60,16 @@ const EventContent = memo(({ event, formattedEventDateTime }) => {
 
   // Helper to render content sections only if they exist
   const renderSection = (title, content, icon, Component, props = {}) => {
-    if (!content || (Array.isArray(content) && !content.length)) return null;
+    // Don't render if content is missing or empty
+    if (!content) return null;
+    
+    // For arrays, check if it's empty or only contains empty strings
+    if (Array.isArray(content)) {
+      // If array is empty or all items are empty strings, don't render
+      if (content.length === 0 || content.every(item => !item || (typeof item === 'string' && item.trim() === ""))) {
+        return null;
+      }
+    }
 
     return (
       <section className="pt-5">
@@ -69,8 +98,25 @@ const EventContent = memo(({ event, formattedEventDateTime }) => {
               <div className="font-medium text-primary mb-1">
                 {getDayDisplay()}
               </div>
-              <div className="text-foreground/80">{formattedDate} <span className="text-primary/70">({dayOfWeek})</span></div>
-              <div className="text-foreground/80">{formattedTime}</div>
+              {!event.bothDayEvent && (
+                <>
+                  <div className="text-foreground/80">{formattedDate} <span className="text-primary/70">({dayOfWeek})</span></div>
+                  <div className="text-foreground/80">{formattedTime}</div>
+                </>
+              )}
+              {event.bothDayEvent && (
+                <>
+                  <div className="text-foreground/80">
+                    <div className="mb-1">
+                      <span className="font-medium text-primary/80">Day 1:</span> {festDates.day1 || "TBA"}
+                    </div>
+                    <div>
+                      <span className="font-medium text-primary/80">Day 2:</span> {festDates.day2 || "TBA"}
+                    </div>
+                  </div>
+                  <div className="text-foreground/80 mt-1">{formattedTime}</div>
+                </>
+              )}
               {event.duration && (
                 <div className="flex items-center mt-1.5 text-foreground/70">
                   <Clock className="h-3 w-3 mr-1.5" />
@@ -108,7 +154,7 @@ const EventContent = memo(({ event, formattedEventDateTime }) => {
             <div>
               <div className="font-medium mb-1">Registration</div>
               <div className="flex items-center">
-                <RegistrationStatus status={event.registrationStatus || 'closed'} />
+                <RegistrationStatus status={registrationStatus} />
               </div>
             </div>
           </div>
@@ -150,9 +196,25 @@ const EventContent = memo(({ event, formattedEventDateTime }) => {
         <Trophy className={`${ICON_SIZE} text-indigo-500`} />,
         ({ content }) => (
           <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/20 dark:to-indigo-900/10 border border-indigo-200 dark:border-indigo-800/40 rounded-lg p-4 shadow-md transition-all duration-300 hover:shadow-lg">
-            <ol className="list-decimal pl-5 space-y-2 text-sm text-foreground/90">
+            <ol className="list-decimal pl-5 space-y-4 text-sm text-foreground/90">
               {content.map((item, index) => (
-                <li key={index} className="leading-relaxed">{item}</li>
+                <li key={index} className="leading-relaxed">
+                  {typeof item === 'object' ? (
+                    <div className="space-y-2">
+                      <div className="font-medium">{item.title}</div>
+                      {item.description && <div className="italic text-foreground/70">{item.description}</div>}
+                      {item.tasks && item.tasks.length > 0 && (
+                        <ul className="list-disc pl-5 space-y-1 mt-2">
+                          {item.tasks.map((task, taskIndex) => (
+                            <li key={taskIndex}>{task}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
+                    item
+                  )}
+                </li>
               ))}
             </ol>
           </div>
@@ -187,28 +249,31 @@ const EventContent = memo(({ event, formattedEventDateTime }) => {
         )
       )}
 
-      {/* Team Size */}
-      {renderSection(
-        "Team Size",
-        event.teamSize,
-        <Users className={`${ICON_SIZE} text-cyan-500`} />,
-        ({ content }) => (
-          <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950/20 dark:to-cyan-900/10 border border-cyan-200 dark:border-cyan-800/40 rounded-lg p-4 text-sm text-foreground/90 shadow-md transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-cyan-200 dark:bg-cyan-700/40 flex items-center justify-center text-cyan-700 dark:text-cyan-300 mr-3">
-                {typeof content === "object" ? content.max : content}
-              </div>
-              <div>
-                {typeof content === "object" && content.min !== undefined && content.max !== undefined
-                  ? `${content.min} - ${content.max} members`
-                  : typeof content === "number" || typeof content === "string"
-                    ? `${content} ${parseInt(content) === 1 ? "member" : "members"}`
-                    : content}
+      {/* Team Size - Only show for team events (when team size > 1) */}
+      {(event.teamSize && 
+        (typeof event.teamSize === 'object' && (event.teamSize.max > 1 || event.teamSize.min > 1)) || 
+        (typeof event.teamSize === 'number' && event.teamSize > 1)) && 
+        renderSection(
+          "Team Size",
+          event.teamSize,
+          <Users className={`${ICON_SIZE} text-cyan-500`} />,
+          ({ content }) => (
+            <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950/20 dark:to-cyan-900/10 border border-cyan-200 dark:border-cyan-800/40 rounded-lg p-4 text-sm text-foreground/90 shadow-md transition-all duration-300 hover:shadow-lg">
+              <div className="flex items-center">
+                <div className="h-8 w-8 rounded-full bg-cyan-200 dark:bg-cyan-700/40 flex items-center justify-center text-cyan-700 dark:text-cyan-300 mr-3">
+                  {typeof content === "object" ? content.max : content}
+                </div>
+                <div>
+                  {typeof content === "object" && content.min !== undefined && content.max !== undefined
+                    ? `${content.min} - ${content.max} members`
+                    : typeof content === "number" || typeof content === "string"
+                      ? `${content} ${parseInt(content) === 1 ? "member" : "members"}`
+                      : content}
+                </div>
               </div>
             </div>
-          </div>
-        )
-      )}
+          )
+        )}
 
       {/* Prizes */}
       {renderSection(

@@ -80,7 +80,6 @@ const TechelonsRegistrationSchema = new mongoose.Schema({
   },
   collegeIdUrl: {
     type: String,
-    required: [true, 'College ID is required'],
     trim: true,
   },
   query: {

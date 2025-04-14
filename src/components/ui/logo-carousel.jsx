@@ -50,30 +50,29 @@ const LogoColumn = React.memo(({ logos, index, currentTime }) => {
         <motion.div
           key={`${logos[currentIndex].id}-${currentIndex}`}
           className="absolute inset-0 flex items-center justify-center"
-          initial={{ y: "10%", opacity: 0, filter: "blur(8px)" }}
+          initial={{ y: "10%", opacity: 0 }}
           animate={{
             y: "0%",
             opacity: 1,
-            filter: "blur(0px)",
             transition: {
               type: "spring",
               stiffness: 300,
               damping: 20,
               mass: 1,
               bounce: 0.2,
-              duration: 0.5,
+              duration: 0.5
             },
           }}
           exit={{
             y: "-20%",
             opacity: 0,
-            filter: "blur(6px)",
             transition: {
               type: "tween",
               ease: "easeIn",
-              duration: 0.3,
+              duration: 0.3
             },
-          }}>
+          }}
+          >
           <CurrentLogo
             className="h-24 w-24 max-h-[90%] max-w-[90%] object-contain md:h-40 md:w-40" />
         </motion.div>

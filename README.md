@@ -1,88 +1,61 @@
-# Webster's MongoDB - Shivaji University Tech Event Platform
+<!-- WEBSTERS - SHIVAJI COLLEGE -->
 
-![Webster's](https://placeholder-for-logo.com/logo.png)
+<div align="center">
+  <img src="/public/assets/webstersLogo White.png" alt="Websters Logo" width="200"/>
+  <h1>Websters - The Computer Science Society</h1>
+  <p><strong>Shivaji College, University of Delhi</strong></p>
+  
+  <p>
+    <a href="https://nextjs.org/">
+      <img src="https://img.shields.io/badge/Built%20with-Next.js%2015-black?style=flat-square" alt="Built with Next.js 15" />
+    </a>
+    <a href="https://reactjs.org/">
+      <img src="https://img.shields.io/badge/React-19.0.0-blue?style=flat-square" alt="React 19.0.0" />
+    </a>
+    <a href="https://tailwindcss.com/">
+      <img src="https://img.shields.io/badge/Styling-TailwindCSS-06B6D4?style=flat-square" alt="TailwindCSS" />
+    </a>
+  </p>
+</div>
 
-## 🚀 Overview
+## 📋 Overview
 
-Webster's MongoDB is a modern web application built for managing Shivaji University's technical events, workshops, and Techelons (technical competitions). This platform provides a comprehensive solution for event registration, workshop signups, competition management, and administrative oversight.
+Websters is the official Computer Science Society of Shivaji College, University of Delhi. Established in 1984, we are dedicated to fostering academic excellence and intellectual growth in the field of computer science. Our website serves as a digital platform for our community, showcasing our events, workshops, and activities.
 
 ## ✨ Features
 
-- **Event Registration System**
-  - Streamlined registration process for university tech events
-  - Automated confirmation emails with registration details
-  - Participant dashboard with registration status
-
-- **Workshop Management**
-  - Workshop catalog with detailed descriptions and schedules
-  - Category-based filtering and search functionality
-  - Capacity tracking and waitlist management
-
-- **Techelons Competition Portal**
-  - Team and individual registration options for technical competitions
-  - Competition rules, guidelines, and resource distribution
-  - Automated team formation and participant matching
-  - File submissions for competition entries
-
-- **Admin Dashboard**
-  - Comprehensive event monitoring and analytics
-  - Participant data management and export
-  - Email communication tools for announcements
-  - Workshop and competition scheduling tools
-  - Sponsor management interface
-
-- **Content Management**
-  - Dynamic site content editing through admin interface
-  - Sponsor showcase and partnership management
-  - Event updates and announcements
-
-- **UI/UX Features**
-  - Responsive design optimized for all devices
-  - Interactive 3D elements using Spline Tool
-  - Smooth animations with Framer Motion
-  - Accessible components with Radix UI
-  - Toast notifications for user actions
+- **Modern UI/UX** - Built with React 19 and Next.js 15
+- **Responsive Design** - Optimized for all device sizes
+- **Dynamic Content** - Content management system ready
+- **Animations** - Smooth animations with Framer Motion
+- **Event Registration** - Workshop and event registration system
+- **Email Notifications** - Automated email notifications for registrations
+- **Admin Dashboard** - Admin panel for managing content and registrations
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Framework**: Next.js 15 with App Router
-- **UI Library**: React 19
-- **Styling**: Tailwind CSS 4 with Class Variance Authority
-- **Component Libraries**:
-  - Radix UI (Accordions, Dialogs, Select, etc.)
-  - Headless UI (Accessible UI primitives)
-- **Animations**:
-  - Framer Motion for page transitions and micro-interactions
-  - Spline Tool for 3D interactive elements
-- **Form Handling**: React Hook Form with Zod validation
-- **Notifications**: React Hot Toast for elegant notifications
-- **Icons**: Heroicons and Lucide React
-- **Additional Utilities**:
-  - Canvas Confetti for celebration effects
-  - date-fns for date manipulation
-  - Swiper for touch-enabled carousels
+- **Frontend**: React 19, Next.js 15
+- **Styling**: TailwindCSS 4, Class Variance Authority
+- **Animations**: Framer Motion
+- **UI Components**: Radix UI
+- **Form Handling**: React Hook Form, Zod validation
+- **Database**: MongoDB with Mongoose
+- **Email Service**: Nodemailer
+- **Deployment**: Vercel
 
-### Backend
-- **Server Framework**: Next.js API Routes
-- **Database**: MongoDB with Mongoose ODM
-- **Email Service**: Nodemailer for automated emails
-- **File Handling**: Native file storage with custom upload API
-
-## 📦 Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18.0 or later
-- npm or yarn
-- MongoDB connection (Atlas or local)
+- Node.js 18.0.0 or higher
+- npm or yarn package manager
 
 ### Installation
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/websters-mongodb.git
-   cd websters-mongodb
+   git clone https://github.com/your-username/websters-shivaji.git
+   cd websters-shivaji
    ```
 
 2. Install dependencies
@@ -93,15 +66,13 @@ Webster's MongoDB is a modern web application built for managing Shivaji Univers
    ```
 
 3. Set up environment variables
-   Create a `.env` file in the root directory with the following variables:
    ```
-   MONGODB_URI=your_mongodb_connection_string
-   EMAIL_USER=your_email_address
+   # Create a .env file in the root directory and add the following variables
+   MONGODB_URI=your_mongodb_uri
+   EMAIL_SERVICE=your_email_service
+   EMAIL_USER=your_email_user
    EMAIL_PASS=your_email_password
-   NEXT_PUBLIC_BASE_URL=http://localhost:3000
-   ADMIN_USERNAME=your_admin_username
-   ADMIN_PASSWORD=your_admin_password
-   UPLOAD_DIR=path/to/upload/directory
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
    ```
 
 4. Run the development server
@@ -111,93 +82,75 @@ Webster's MongoDB is a modern web application built for managing Shivaji Univers
    yarn dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application
 
-## 🔧 Project Structure
+## 📁 Project Structure
 
 ```
-websters-mongodb/
+websters-shivaji/
+├── public/
+│   └── assets/           # Static assets (images, fonts, etc.)
 ├── src/
-│   ├── app/                       # Next.js App Router pages
-│   │   ├── page.js                # Homepage
-│   │   ├── layout.js              # Root layout
-│   │   ├── admin/                 # Admin dashboard
-│   │   ├── api/                   # API endpoints
-│   │   ├── register-options/      # Registration options
-│   │   ├── techelons/             # Techelons pages
-│   │   ├── techelonsregistration/ # Techelons registration
-│   │   ├── workshopregistration/  # Workshop registration
-│   │   └── formsubmitted/         # Submission confirmation
-│   ├── components/                # Reusable UI components
-│   │   └── ui/                    # UI component library
-│   ├── models/                    # MongoDB schemas and models
-│   │   ├── TechelonsData.js       # Techelons competition model
-│   │   ├── TechelonsRegistration.js # Registration model
-│   │   ├── WorkshopRegistration.js # Workshop model
-│   │   ├── SiteContent.js         # Content management model
-│   │   ├── SponsorsData.js        # Sponsors model
-│   │   └── FileUpload.js          # File storage model
-│   ├── lib/                       # Utility functions
-│   │   ├── mongodb.js             # MongoDB connection
-│   │   └── utils.js               # Helper functions
-│   └── middleware.js              # API route protection
-├── public/                        # Static assets
-└── ...config files
+│   ├── app/              # Next.js App Router
+│   │   ├── _components/  # Page-specific components
+│   │   ├── admin/        # Admin dashboard
+│   │   ├── api/          # API routes
+│   │   └── data/         # Static site content
+│   ├── components/       # Reusable UI components
+│   ├── lib/              # Utility functions and helpers
+│   ├── models/           # MongoDB schemas
+│   └── middleware.js     # Next.js middleware
+├── .env                  # Environment variables
+└── package.json          # Project dependencies
 ```
 
-## 📱 App Modules
+## 🌟 Key Features
 
-### User-Facing Modules
-- **Homepage** - Introduction to Webster's events with interactive elements
-- **Registration Portal** - Multi-step registration workflow for events
-- **Workshop Registration** - Dedicated registration for technical workshops
-- **Techelons Registration** - Team and individual competition signups
-- **Confirmation Pages** - Success and error handling for form submissions
+### Home Page
+- Animated banner showcasing society information
+- About section with society history and mission
+- Workshop announcements
+- Past events gallery
+- Council members showcase
 
-### Admin Modules
-- **Dashboard** - Overview of registrations and event metrics
-- **Participant Management** - View, edit, and export participant data
-- **Workshop Administration** - Manage capacity and details
-- **Techelons Control** - Competition setup and participant tracking
-- **Content Editor** - Update site content dynamically
-- **Sponsor Management** - Add and edit sponsor information
+### Event Registration
+- Registration forms for workshops and events
+- Email confirmation system
+- WhatsApp group integration
 
-## 🔒 Security Features
+### Admin Dashboard
+- Manage site content
+- View and export registrations
+- Update event details
 
-- Middleware-based route protection for admin sections
-- Secure form validation with React Hook Form and Zod
-- MongoDB schema validation for data integrity
-- Encrypted sensitive information in database
+## 📝 Content Management
 
-## 🚀 Deployment
+The website implements a hybrid content management approach:
 
-The application is optimized for deployment on Vercel or similar platforms:
+- **API-First Strategy**: Content is primarily fetched from a backend API
+- **Static Fallback System**: In case of API request failures, the application seamlessly falls back to local content stored in the `src/app/data/` directory, ensuring the content remains accessible at all times.
+- **Error Handling**: Built-in error boundaries and fallback UI prevent blank screens during connectivity issues
+- **Admin Panel**: Content can be managed through the admin interface at `/admin` (requires authentication)
 
-```bash
-npm run build
-npm run start
-```
+To modify default content, edit the corresponding files in the `src/app/data/` directory.
 
-For production deployment:
-1. Set up proper environment variables on your hosting platform
-2. Configure MongoDB Atlas for database hosting
-3. Set up proper CORS and security headers
-4. Enable proper caching strategies for static assets
+## 📱 Progressive Web App
 
-Refer to the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for platform-specific guidelines.
+This website is PWA-ready, allowing users to install it on their devices for a native-like experience.
 
-## 🧪 Future Improvements
+## 👨‍💻 Developer
 
-- Implement real-time notifications with WebSockets
-- Add participant authentication with JWT or NextAuth
-- Integrate payment gateway for paid workshops
-- Develop mobile application using React Native
-- Implement analytics dashboard with detailed metrics
+Project developed by:
 
-## 📄 License
+- **Shivam Raj Gupta** - Technical Head - [LinkedIn](https://www.linkedin.com/in/shivam-raj-gupta/) - [guptashivam25oct@gmail.com](mailto:guptashivam25oct@gmail.com)
 
-This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contributors
+## 📝 License
 
-- [Shivam Raj Gupta](https://github.com/shivamGupta-25) - Project Lead
+This project is maintained by Websters, the Computer Science Society of Shivaji College, University of Delhi.
+
+## 📞 Contact
+
+- **Instagram**: [@websters.shivaji](https://www.instagram.com/websters.shivaji/)
+- **LinkedIn**: [Websters - Shivaji College](https://www.linkedin.com/company/websters-shivaji-college/)
+- **Email**: websters@shivaji.du.ac.in

@@ -27,7 +27,14 @@ const ContactDialogContent = memo(() => (
                 <div>
                     <h4 className="text-sm font-medium leading-none mb-1">Address</h4>
                     <p className="text-sm text-gray-700">
-                        Shivaji College, University of Delhi, Delhi, 110027
+                        <a
+                            href="https://maps.app.goo.gl/cQEqwx1Xv1NDg3wN7"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                        >
+                            Department of Computer Science, Shivaji College, University of Delhi, Delhi, 110027
+                        </a>
                     </p>
                 </div>
             </div>
@@ -47,14 +54,14 @@ const ContactDialogContent = memo(() => (
         </div>
         <DialogFooter className="flex justify-center sm:justify-center">
             <div className="flex gap-x-6">
-                <a href="https://instagram.com/websters" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <a href="https://www.instagram.com/websters.shivaji/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hover:text-pink-600 transition-colors">
                         <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                         <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                     </svg>
                 </a>
-                <a href="https://www.linkedin.com/company/websters" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <a href="https://www.linkedin.com/company/websters-shivaji-college/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hover:text-blue-700 transition-colors">
                         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
                         <rect width="4" height="12" x="2" y="9" />
