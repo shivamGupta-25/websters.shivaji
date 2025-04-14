@@ -241,7 +241,7 @@ export default function ContentManagement() {
             ...prev,
             pastEvents: {
                 ...prev.pastEvents,
-                events: [...(prev.pastEvents.events || []), { ...newEvent }],
+                events: [{ ...newEvent }, ...(prev.pastEvents.events || [])],
             },
         }));
 
@@ -268,6 +268,33 @@ export default function ContentManagement() {
                 toast.success("Event removed");
             }
         );
+    };
+
+    const moveEvent = (index, direction) => {
+        setContent(prev => {
+            const newEvents = [...prev.pastEvents.events];
+
+            // Don't move if at boundaries
+            if (
+                (direction === 'up' && index === 0) ||
+                (direction === 'down' && index === newEvents.length - 1)
+            ) {
+                return prev;
+            }
+
+            const targetIndex = direction === 'up' ? index - 1 : index + 1;
+            [newEvents[index], newEvents[targetIndex]] =
+                [newEvents[targetIndex], newEvents[index]];
+
+            return {
+                ...prev,
+                pastEvents: {
+                    ...prev.pastEvents,
+                    events: newEvents,
+                },
+            };
+        });
+        toast.success(`Event moved ${direction}`);
     };
 
     // Dialog helper
@@ -664,6 +691,29 @@ export default function ContentManagement() {
                                                     )}
                                                 </div>
                                                 <div className="space-y-2">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => moveEvent(index, 'up')}
+                                                                disabled={index === 0}
+                                                                className="h-8 w-8"
+                                                            >
+                                                                <ArrowUp className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => moveEvent(index, 'down')}
+                                                                disabled={index === content.pastEvents.events.length - 1}
+                                                                className="h-8 w-8"
+                                                            >
+                                                                <ArrowDown className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                        <span className="text-xs text-muted-foreground">Event {index + 1}</span>
+                                                    </div>
                                                     <Label>Title</Label>
                                                     <Input
                                                         value={event.title}
@@ -688,6 +738,10 @@ export default function ContentManagement() {
 
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium">Add New Event</h3>
+                                <div className="flex items-center gap-2 p-3 bg-primary/10 border rounded-md text-sm">
+                                    <PlusCircle className="h-4 w-4 text-primary" />
+                                    <p>New events will be added at the beginning of the list.</p>
+                                </div>
                                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                                     <div className="space-y-2">
                                         <Label>Title</Label>
