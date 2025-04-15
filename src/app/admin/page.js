@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, FileText, Calendar, Award, DollarSign } from "lucide-react";
+import { ArrowRight, FileText, Calendar, Award, DollarSign, BarChart } from "lucide-react";
 
 export default function AdminDashboard() {
     // Management cards configuration
@@ -44,6 +44,15 @@ export default function AdminDashboard() {
             buttonColor: "bg-green-600 hover:bg-green-700",
             details: "Add, edit, or remove event sponsors. Update sponsor logos, website links, and display information.",
             link: "/admin/sponsors",
+        },
+        {
+            title: "Analytics Dashboard",
+            description: "View insights and statistics about registrations and events",
+            icon: <BarChart className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-600" />,
+            iconBg: "bg-indigo-100",
+            buttonColor: "bg-indigo-600 hover:bg-indigo-700",
+            details: "Access detailed analytics and visualizations about event registrations, workshop participation, and more.",
+            link: "/admin/analytics",
         }
     ];
 
