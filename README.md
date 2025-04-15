@@ -24,24 +24,60 @@ Websters is the official Computer Science Society of Shivaji College, University
 
 ## ✨ Features
 
-- **Modern UI/UX** - Built with React 19 and Next.js 15
-- **Responsive Design** - Optimized for all device sizes
-- **Dynamic Content** - Content management system ready
-- **Animations** - Smooth animations with Framer Motion
-- **Event Registration** - Workshop and event registration system
-- **Email Notifications** - Automated email notifications for registrations
-- **Admin Dashboard** - Admin panel for managing content and registrations
+- **Modern UI/UX** - Built with React 19 and Next.js 15 App Router
+- **Responsive Design** - Optimized for all device sizes with Tailwind CSS 4
+- **Event Management**
+  - Workshop registration system with email confirmations
+  - Techelons event registration with team/individual options and email confirmations to all participants
+  - WhatsApp group integration for event communication
+  - Event sharing functionality across social media platforms
+- **Admin Dashboard**
+  - Protected admin area with authentication
+  - Content management for site sections
+  - Event management and registration monitoring
+  - Comprehensive analytics of registrations and events
+  - QR code generation for registration links without third-party dependencies
+  - Unused file management to optimize storage and performance
+  - Sponsor management
+- **Animations** - Interactive UI with Framer Motion and Spline 3D
+- **Error Handling** - Robust form validation with Zod and React Hook Form
+- **Email Notifications** - Automated email system with customized templates
+- **Performance Optimization** - Vercel Analytics and Speed Insights integration
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Next.js 15
-- **Styling**: TailwindCSS 4, Class Variance Authority
-- **Animations**: Framer Motion
-- **UI Components**: Radix UI
-- **Form Handling**: React Hook Form, Zod validation
-- **Database**: MongoDB with Mongoose
-- **Email Service**: Nodemailer
-- **Deployment**: Vercel
+- **Frontend**
+  - React 19
+  - Next.js 15 (App Router)
+  - TailwindCSS 4
+  - shadcn/ui
+  - Framer Motion for animations
+  - Spline for 3D animations
+  - Swiper for carousels
+  - Canvas Confetti for celebrations
+  - React Intersection Observer for scroll animations
+- **UI Components**
+  - Radix UI primitives (Dialog, Accordion, Tabs, etc.)
+  - Headless UI components
+  - Heroicons and Lucide React for icons
+  - Class Variance Authority for component variants
+- **Form Handling**
+  - React Hook Form
+  - Zod validation
+  - React Hot Toast for notifications
+- **Data Visualization**
+  - Recharts for analytics graphs
+  - Date-fns for date formatting
+- **Database**
+  - MongoDB with Mongoose ODM
+- **Authentication**
+  - Custom middleware-based authentication system
+- **Email Service**
+  - Nodemailer with custom HTML templates
+- **Monitoring**
+  - Vercel Analytics and Speed Insights
+- **Development Tools**
+  - React Error Boundary for error handling
 
 ## 🚀 Getting Started
 
@@ -73,6 +109,8 @@ Websters is the official Computer Science Society of Shivaji College, University
    EMAIL_USER=your_email_user
    EMAIL_PASS=your_email_password
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   ADMIN_USERNAME=your_admin_username
+   ADMIN_PASSWORD=your_admin_password
    ```
 
 4. Run the development server
@@ -89,57 +127,99 @@ Websters is the official Computer Science Society of Shivaji College, University
 ```
 websters-shivaji/
 ├── public/
-│   └── assets/           # Static assets (images, fonts, etc.)
+│   └── assets/           # Static assets (images, logos, etc.)
 ├── src/
 │   ├── app/              # Next.js App Router
 │   │   ├── _components/  # Page-specific components
-│   │   ├── admin/        # Admin dashboard
+│   │   ├── admin/        # Admin dashboard features
+│   │   │   ├── analytics/           # Analytics dashboard
+│   │   │   ├── login/               # Admin authentication
+│   │   │   ├── techelons-events/    # Event management
+│   │   │   ├── workshop/            # Workshop management
+│   │   │   └── sponsors/            # Sponsor management
 │   │   ├── api/          # API routes
-│   │   └── data/         # Static site content
+│   │   │   ├── admin/               # Admin API endpoints
+│   │   │   ├── techelons/           # Techelons API endpoints
+│   │   │   └── workshop/            # Workshop API endpoints
+│   │   ├── email/        # Email service templates
+│   │   └── data/         # Fallback static site content
 │   ├── components/       # Reusable UI components
+│   │   └── ui/           # UI component library
 │   ├── lib/              # Utility functions and helpers
 │   ├── models/           # MongoDB schemas
-│   └── middleware.js     # Next.js middleware
+│   │   ├── TechelonsData.js         # Techelons event schema
+│   │   ├── TechelonsRegistration.js # Event registration schema
+│   │   ├── SiteContent.js           # Site content schema
+│   │   ├── SponsorsData.js          # Sponsors schema
+│   │   └── WorkshopRegistration.js  # Workshop registration schema
+│   └── middleware.js     # Next.js middleware for auth and protection
 ├── .env                  # Environment variables
 └── package.json          # Project dependencies
 ```
 
-## 🌟 Key Features
+## 🌟 Key Features Explained
 
 ### Home Page
-- Animated banner showcasing society information
-- About section with society history and mission
-- Workshop announcements
-- Past events gallery
-- Council members showcase
+- Animated banner
+- About section describing the society
+- Workshop announcements with registration links
+- Past events gallery with Swiper carousels
+- Council members showcase with animations
 
-### Event Registration
-- Registration forms for workshops and events
-- Email confirmation system
-- WhatsApp group integration
+### Event Registration System
+- **Workshop Registration**
+  - Form validation with Zod schemas
+  - Duplicate registration prevention
+  - Email confirmation
+  
+- **Techelons Event Registration**
+  - Support for both individual and team events
+  - Dynamic team size validation based on event requirements
+  - Comprehensive validation for participant details
+  - Duplicate registration prevention
+  - Duplicate registration detection across team members
+  - Email confirmations with event details
 
 ### Admin Dashboard
-- Manage site content
-- View and export registrations
-- Update event details
+- **Authentication System**
+  - Secure login with session management
+  - Middleware protection for admin routes
+  
+- **Analytics Dashboard**
+  - Registration statistics by event, course, college, and date
+  - Visual charts with Recharts
+  
+- **Content Management**
+  - Update site various sections and pages
+  - Edit workshop details and registration status
+  - Manage Techelons event details and status
+  - Sponsor management with logo uploads
 
-## 📝 Content Management
+### Email Notification System
+- Customized HTML templates for different events
+- WhatsApp group links in confirmation emails
+- Error handling and fallback mechanisms
 
-The website implements a hybrid content management approach:
+### Fallback Mechanisms
+- **API-First Strategy**: Content is primarily fetched from the MongoDB database
+- **Static Fallback System**: In case of API failures, the application falls back to local content stored in the `src/app/data/` directory
+- **Error Handling**: Comprehensive error boundaries prevent blank screens during connectivity issues
 
-- **API-First Strategy**: Content is primarily fetched from a backend API
-- **Static Fallback System**: In case of API request failures, the application seamlessly falls back to local content stored in the `src/app/data/` directory, ensuring the content remains accessible at all times.
-- **Error Handling**: Built-in error boundaries and fallback UI prevent blank screens during connectivity issues
-- **Admin Panel**: Content can be managed through the admin interface at `/admin` (requires authentication)
+## 📱 Progressive Enhancement
 
-To modify default content, edit the corresponding files in the `src/app/data/` directory.
-
-## 📱 Progressive Web App
-
-This website is PWA-ready, allowing users to install it on their devices for a native-like experience.
+The website is built with progressive enhancement in mind:
+- Core functionality works without JavaScript
+- Enhanced experience with JavaScript enabled
+- Responsive design adapts to all device sizes
+- Optimized for performance with Vercel Speed Insights
 
 ## 👨‍💻 Developer
 
 Project developed by:
 
 - **Shivam Raj Gupta** - Technical Head - [LinkedIn](https://www.linkedin.com/in/shivam-raj-gupta/) - [guptashivam25oct@gmail.com](mailto:guptashivam25oct@gmail.com)
+
+## 📞 Contact
+
+- **LinkedIn**: [Shivam Raj Gupta](https://www.linkedin.com/in/shivam-raj-gupta/)
+- **Email**: guptashivam25oct@gmail.com
