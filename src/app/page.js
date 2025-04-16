@@ -10,6 +10,7 @@ import PastEvent from './_components/PastEvent';
 import Footer from './_components/Footer';
 import ScrollIndicator from './_components/ScrollIndicator';
 import ScrollToTopButton from './_components/ScrollToTopButton';
+import { OrganizationSchema, EventSchema } from '../components/StructuredData';
 
 export default function Home() {
   const [showIndicator, setShowIndicator] = useState(true);
@@ -37,6 +38,17 @@ export default function Home() {
 
   return (
     <>
+      {/* Add structured data for SEO */}
+      <OrganizationSchema />
+      <EventSchema 
+        name="Techelons 2025"
+        startDate="2025-04-07"
+        endDate="2025-04-08"
+        location="Shivaji College, University of Delhi"
+        description="Annual tech fest organized by Websters - The Computer Science Society"
+        image="/assets/techelons2025.png"
+      />
+      
       <Header />
       <main>
         <Banner />

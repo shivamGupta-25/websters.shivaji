@@ -1,0 +1,10 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://webstersshivaji.vercel.app/sitemap.xml
+
+# Disallow specific areas if needed (uncomment if necessary)
+# Disallow: /admin/
+# Disallow: /api/ 
